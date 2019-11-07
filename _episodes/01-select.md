@@ -1,6 +1,6 @@
 ---
 title: "Selecting Data"
-teaching: 10
+teaching: 13
 exercises: 5
 questions:
 - "How can I get data from a database?"
