@@ -3,34 +3,28 @@ layout: lesson
 root: .
 ---
 
-In the late 1920s and early 1930s,
-William Dyer,
-Frank Pabodie,
-and Valentina Roerich led expeditions to the
-[Pole of Inaccessibility](https://en.wikipedia.org/wiki/Pole_of_inaccessibility)
-in the South Pacific,
-and then onward to Antarctica.
-Two years ago,
-their expeditions were found in a storage locker at Miskatonic University.
-We have scanned and OCR the data they contain,
-and we now want to store that information
-in a way that will make search and analysis easy.
+Casi todos los desarrollos que se hacen a día de hoy en bioinformática de una u otra manera hacen uso de datos almacenados en bases de datos “biológicas” o “bioinformáticas”.
+Una base de datos biológica es un almacén de datos para información derivada de los datos obtenidos experimentos biológicos, ni más ni menos. 
+Y una base de datos bioinformática es un almacén de datos para información derivada de datos biológicos y de programas bioinformáticos. 
+A nivel más técnico, las bases de datos biológicas y bioinformáticas están disponibles generalmente como un conjunto de ficheros planos, cuyo tamaño suele ser enorme.
 
-Three common options for storage are
-text files,
-spreadsheets,
-and databases.
-Text files are easiest to create,
-and work well with version control,
-but then we would have to build search and analysis tools ourselves.
-Spreadsheets are good for doing simple analyses,
-but they don't handle large or complex data sets well.
-Databases, however, include powerful tools for search and analysis,
-and can handle large, complex data sets.
-These lessons will show how to use a database to explore the expeditions' data.
+Además de los archivos de texto,  existen otras formas de almacenamiento muy comunes en nuestro campo, 
+hojas de cálculo (generalmente muy mala idea: [ejemplo](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1044-7)) y las bases de datos relacionales. 
+Los archivos de texto son más fáciles de crear y funcionan bien con el control de versiones, 
+pero entonces tendríamos que construir herramientas de búsqueda y análisis nosotros mismos. 
+Las hojas de cálculo son buenas para hacer análisis simples, pero no manejan bien conjuntos de datos 
+grandes o complejos. Sin embargo, las bases de datos incluyen herramientas poderosas para búsqueda y análisis, 
+y pueden manejar conjuntos de datos grandes y complejos. 
 
-> ## Prerequisites
+A lo largo de las siguientes lecciones, se explicará que es un gesto de base de datos, como se insertan datos, como se ocnsultan esos datos y como se peude hacer todo esto de
+forma automática gracias a la programación en Python.
+
+
 >
-> * This lesson requires the Unix shell, plus [SQLite3](http://www.sqlite.org/) or [DB Browser for SQLite](http://sqlitebrowser.org/).
-> * Please download the database we will use: [survey.db]({{ page.root }}/files/survey.db)
+> ## Prerequisitos
+>
+> * Estas practicas requieren de una shell de Unix, de [SQLite3](http://www.sqlite.org/), de [Python 3.7](https://www.python.org/downloads/) o superior y del paquete [PySQLite](https://pypi.org/project/pysqlite/).
+>
 {: .prereq}
+
+{% include sc/schedule.html %}

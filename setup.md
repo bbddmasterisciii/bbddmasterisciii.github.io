@@ -3,24 +3,16 @@ layout: page
 title: Setup
 ---
 # Software
-For this course you will need the UNIX shell, plus [SQLite3](http://www.sqlite.org/) or
-[DB Browser for SQLite](http://sqlitebrowser.org/).
+Para este curso, principalmente necesitarás una shell de Unix, [SQLite3](http://www.sqlite.org/), [Python 3.7](https://www.python.org/downloads/) o superior y el paquete [PySQLite](https://pypi.org/project/pysqlite/).
 
-If you are running Linux, you may already have SQLite3 installed, please use the command 
-`which sqlite3` to see the path of the program, otherwise you should be able to get it 
-from your package manager (on Debian/Ubuntu, you can use the command `apt install sqlite3`).
+Si estas trabajando en una máquina Linux, como Ubuntu, lo más seguro es que ya tengas este programa instalado.
+Por favor, desde la consola usa el comando `which sqlite3` para ver el path al programa. Si al ejecutar este comando no
+aparece ningún resultado, podría ser necesario su instalación. 
 
-If you are running Windows, run installers as administrator.
-Additionally, make sure you select the right installer version for your system.
-We recommend that you use [git for Windows](https://gitforwindows.org/).
-This is described in the [UNIX Shell lesson](http://swcarpentry.github.io/shell-novice/setup.html).
-If the installer asks to add the path to the environment variables, check yes, otherwise you have to manually add the path of the executable to the `PATH` environmental variables.
-This path informs the system where to find the executable program.
+Para instalar SQLite en sistemas como Debian/Ubuntu, debes invocar el siguiente comando `sudo apt install sqlite3`.
+En sistemas como Red Hat/CentOs, debes usar `sudo yum install sqlite.x86_64`
 
-If installing SQLite3 using Anaconda, refer to the [anaconda sqlite docs](https://anaconda.org/anaconda/sqlite).
+Si has instalado SQLite3 usando Anaconda, por favor usa la [documentación](https://anaconda.org/anaconda/sqlite) que ellos proporcionan.
 
-After the installation and the setting of the paths, close the terminal and reopen a new terminal.
-This enables paths and configurations to be loaded.
-
-# Files
-Please download the database we'll be using: [survey.db]({{ page.root }}/files/survey.db)
+Una vez instalado, cierra el terminal y vuelve a abirlo, de esta forma se carga el path y las configuracioens necesarias
+para que todo funcione correctamente.
