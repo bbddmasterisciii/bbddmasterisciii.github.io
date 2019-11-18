@@ -40,7 +40,7 @@ SQL proporciona cientos de formas diferentes de analizar y recombinar datos.
 Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de lo que hacen los científicos.
 
 
-> ## Gestores de bases de datos
+> ## 0. Gestores de bases de datos
 >
 > Existen muchos gestores de bases de datos (Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access y SQLite) y todos entienden el lenguaje SQL, 
 > pero cada uno almacena los datos de una manera diferente, por lo que una base de datos creada con uno no puede ser utilizada
@@ -48,7 +48,7 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 > formatos como .csv, SQL, por lo que es posible mover información de uno a otro.
 {: .callout}
 
-> ## Entrar y salir de SQLite
+> ## 1. Entrar y salir de SQLite
 >
 > Para usar los comandos SQLite de forma *interactiva*, necesitamos
 > entrar en la consola SQLite. Para ello, lo más recomendable es que os creeis una carpeta para almacenar los datos.
@@ -73,7 +73,7 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
  {: .callout}
 
 
-> ## Primeros comandos en SQL
+> ## 1.1 Primeros comandos en SQL
 >
 > Antes de empezar, tenemos que copiar/mover el fichero recién descargado a nuestro directorio.
 > Una vez lo tengais (por ejemplo $HOME/SQL/), comprobadlo desde la terminal
@@ -110,7 +110,7 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 > Escribe `.tables` para ver las tablas contenidas en la base de datos.
 >
 > ~~~
-> >sqlite>.tables
+> sqlite> .tables
 > ~~~
 > {: .sql}
 > ~~~
@@ -118,10 +118,10 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 > ~~~
 > {: .output}
 >
-> Para obtener mas infromación sobre estas tablas, puedes escribir `.schema` y de esta forma, podrás ver los comandos SQL usados para crear estas
+> Para obtener mas información sobre estas tablas, puedes escribir `.schema` y de esta forma, podrás ver los comandos SQL usados para crear estas
 > tablas en la base de datos. Por ejemplo, estos comandos SQL mostrarán el conjunto de columnas y el tipo de datos que cada columna almacena.
 > ~~~
-> >sqlite> .schema
+> sqlite> .schema
 > ~~~
 > {: .sql}
 > ~~~
@@ -141,14 +141,13 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 >
 {: .callout}
 
-For now,
-let's write an SQL query that displays scientists' names.
-We do this using the SQL command `SELECT`,
-giving it the names of the columns we want and the table we want them from.
-Our query and its output look like this:
+Por ahora, escribamos una consulta SQL que muestre los nombres de los científicos.
+Hacemos esto usando el comando SQL `SELECT`,
+dándole los nombres de las columnas que queremos y la tabla de la que las queremos.
+Nuestra consulta y su salida se ven así:
 
 ~~~
-> sqlite> SELECT family, personal FROM Person;
+sqlite> SELECT family, personal FROM Person;
 ~~~
 {: .sql}
 
@@ -160,10 +159,9 @@ Roerich|Valentina
 Danforth|Frank
 ```
 
-You can change some SQLite settings to make the output easier to read.
-First,
-set the output mode to display left-aligned columns.
-Then turn on the display of column headers.
+Podeis cambiar algunas configuraciones de SQLite para que la salida de los resultados sea más fácil de leer.
+Primero, configura el modo de salida para mostrar columnas alineadas a la izquierda.
+Luego activa los encabezados de columna.
 
 ~~~
 sqlite> .mode column
@@ -181,13 +179,9 @@ sqlite> SELECT family, personal FROM Person;
 |Danforth|Frank    |
 
 
-The semicolon at the end of the query
-tells the database manager that the query is complete and ready to run.
-We have written our commands in upper case and the names for the table and columns
-in lower case,
-but we don't have to:
-as the example below shows,
-SQL is [case insensitive]({% link reference.md %}#case-insensitive).
+Como veis, hemos escrito nuestros comandos en mayúsculas y los nombres de la tabla y las columnas.
+en minúsculas, pero no tenemos porqué como muestra el siguiente ejemplo,
+SQL es [insensible a mayúsculas y minúsculas]({% link reference.md %}#case-insensitive).
 
 ~~~
 SeLeCt FaMiLy, PeRsOnAl FrOm PeRsOn;
@@ -202,22 +196,19 @@ SeLeCt FaMiLy, PeRsOnAl FrOm PeRsOn;
 |Roerich |Valentina|
 |Danforth|Frank    |
 
-You can use SQL's case insensitivity to your advantage. For instance,
-some people choose to write SQL keywords (such as `SELECT` and `FROM`)
-in capital letters and **field** and **table** names in lower
-case. This can make it easier to locate parts of an SQL statement. For
-instance, you can scan the statement, quickly locate the prominent
-`FROM` keyword and know the table name follows.  Whatever casing
-convention you choose, please be consistent: complex queries are hard
-enough to read without the extra cognitive load of random
-capitalization.  One convention is to use UPPER CASE for SQL
-statements, to distinguish them from tables and column names. This is
-the convention that we will use for this lesson.
+Es útil separar el uso de la mayúsculas y minúsculas en SQL. Por ejemplo,
+algunas personas optan por escribir palabras clave SQL (como `SELECT` y` FROM`)
+en mayúsculas y los nombres de los ** campos ** y ** tablsa ** en minúscula. 
+Las consultas de SQL puedes ser muy complejas, de varias líneas de longitud y los suficientemente difíciles
+para leer sin la carga cognitiva adicional de la capitalización aleatoria. 
+Una convención es usar MAYÚSCULAS para las declaraciones de SQL y distinguirlas de tablas y nombres de columnas. 
+Esto es la convención que usaremos para esta lección.
 
-While we are on the topic of SQL's syntax, one aspect of SQL's syntax
-that can frustrate novices and experts alike is forgetting to finish a
-command with `;` (semicolon).  When you press enter for a command
-without adding the `;` to the end, it can look something like this:
+El punto y coma al final de la consulta le dice al gestor de la base de datos que la consulta está completa y lista para ejecutarse.
+Mientras estamos en el tema de la sintaxis de SQL, un aspecto de la sintaxis de SQL
+que puede frustrar tanto a los principiantes como a los expertos es olvidar terminar un
+comando con `;` (punto y coma). Cuando presionas enter para un comando
+sin agregar el `;` al final, puede verse más o menos así:
 
 ~~~
 SELECT id FROM Person
@@ -226,17 +217,13 @@ SELECT id FROM Person
 ~~~
 {: .sql}
 
-This is SQL's prompt, where it is waiting for additional commands or
-for a `;` to let SQL know to finish.  This is easy to fix!  Just type
-`;` and press enter!
+Esta es la consola de SQLite esperando comandos adicionales o un `;` para que SQL sepa que debe finalizar. 
+¡Esto es fácil de arreglar! Escribe `;` y presiona enter!
 
-Now, going back to our query,
-it's important to understand that
-the rows and columns in a database table aren't actually stored in any particular order.
-They will always be *displayed* in some order,
-but we can control that in various ways.
-For example,
-we could swap the columns in the output by writing our query as:
+Ahora, volviendo a nuestra consulta SQL anterior, es importante entender que
+las filas y columnas en una tabla de base de datos no se almacenan en ningún orden en particular.
+Siempre se * mostrarán * en algún orden, pero podemos controlar eso de varias maneras.
+Por ejemplo, podríamos intercambiar las columnas en la salida escribiendo nuestra consulta como:
 
 ~~~
 SELECT personal, family FROM Person;
@@ -251,7 +238,7 @@ SELECT personal, family FROM Person;
 |Valentina|Roerich |
 |Frank    |Danforth|
 
-or even repeat columns:
+o incluso repetir columnas:
 
 ~~~
 SELECT id, id, id FROM Person;
@@ -266,8 +253,7 @@ SELECT id, id, id FROM Person;
 |roe     |roe     |roe     |
 |danforth|danforth|danforth|
 
-As a shortcut,
-we can select all of the columns in a table using `*`:
+A modo de atajo, podemos seleccionar todas las columnas de una tabla usando `*`:
 
 ~~~
 SELECT * FROM Person;
@@ -283,19 +269,15 @@ SELECT * FROM Person;
 |danforth|Frank    |Danforth|
 
 
+> De nuevo, para salir de SQLite y volver a la línea de comando del shell,
+> podeis usar `.quit` o` .exit`.
 
 
-
-> To exit SQLite and return to the shell command line,
-> you can use either `.quit` or `.exit`.
-
-
-
-> ## Understanding CREATE statements
+> ## Comprendiendo las declaraciones CREATE
 > 
-> Use the `.schema` to identify column that contains integers.
+> Use el comando `.schema` para identificar la columna que contiene números enteros .
 >
-> > ## Solution
+> > ## Solución
 > >
 > > ~~~
 > > .schema
@@ -308,15 +290,15 @@ SELECT * FROM Person;
 > > CREATE TABLE Visited (id integer, site text, dated text);
 > > ~~~
 > > {: .output}
-> > From the output, we see that the **taken** column in the **Survey** table (3rd line) is composed of integers. 
+> > Del resultado obtenido, vemos que la columna **taken** en la tabla **Survey** (tercera línea) está compuesta de enteros. 
 > {: .solution}
 {: .challenge}
 
-> ## Selecting Site Names
+> ## Seleccionar nombres de sitios
 >
-> Write a query that selects only the `name` column from the `Site` table.
+> Escriba una consulta que seleccione solo la columna `name` de la tabla `Site`.
 >
-> > ## Solution
+> > ## Solución
 > > 
 > > ~~~
 > > SELECT name FROM Site;
@@ -331,21 +313,21 @@ SELECT * FROM Person;
 > {: .solution}
 {: .challenge}
 
-> ## Query Style
+> ## Estilo de consultas
 >
-> Many people format queries as:
+> Muchas personas esceiben las consultas SQL dándole el siguente formato: 
 >
 > ~~~
 > SELECT personal, family FROM person;
 > ~~~
 > {: .sql}
 >
-> or as:
+> o así:
 >
 > ~~~
 > select Personal, Family from PERSON;
 > ~~~
 > {: .sql}
 >
-> What style do you find easiest to read, and why?
+> ¿Qué estilo te resulta más fácil de leer y por qué?
 {: .challenge}
