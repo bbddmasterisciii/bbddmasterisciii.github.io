@@ -1,7 +1,7 @@
 ---
 title: "Familiarización con la shell SQLite"
 teaching: 60
-exercises: 120
+exercises: 30
 
 questions:
 - "Como entrar al gestor de bases de datos?"
@@ -139,138 +139,138 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 > 
 > Nota: Los tipos de datos disponibles varían según el gestor de la base de datos; Para SQLite puedes consultarlos [aquí](https://www.sqlite.org/datatype3.html).
 >
-{: .callout}
-
-Por ahora, escribamos una consulta SQL que muestre los nombres de los científicos.
-Hacemos esto usando el comando SQL `SELECT`,
-dándole los nombres de las columnas que queremos y la tabla de la que las queremos.
-Nuestra consulta y su salida se ven así:
-
-~~~
-sqlite> SELECT family, personal FROM Person;
-~~~
-{: .sql}
-
-```
-Dyer|William
-Pabodie|Frank
-Lake|Anderson
-Roerich|Valentina
-Danforth|Frank
-```
-
-Podeis cambiar algunas configuraciones de SQLite para que la salida de los resultados sea más fácil de leer.
-Primero, configura el modo de salida para mostrar columnas alineadas a la izquierda.
-Luego activa los encabezados de columna.
-
-~~~
-sqlite> .mode column
-sqlite> .header on
-sqlite> SELECT family, personal FROM Person;
- ~~~
- {: .sql}
-
-|family  |personal |
-|--------|---------|
-|Dyer    |William  |
-|Pabodie |Frank    |
-|Lake    |Anderson |
-|Roerich |Valentina|
-|Danforth|Frank    |
-
-
-Como veis, hemos escrito nuestros comandos en mayúsculas y los nombres de la tabla y las columnas.
-en minúsculas, pero no tenemos porqué como muestra el siguiente ejemplo,
-SQL es [insensible a mayúsculas y minúsculas]({% link reference.md %}#case-insensitive).
-
-~~~
-SeLeCt FaMiLy, PeRsOnAl FrOm PeRsOn;
-~~~
-{: .sql}
-
-|family  |personal |
-|--------|---------|
-|Dyer    |William  |
-|Pabodie |Frank    |
-|Lake    |Anderson |
-|Roerich |Valentina|
-|Danforth|Frank    |
-
-Es útil separar el uso de la mayúsculas y minúsculas en SQL. Por ejemplo,
-algunas personas optan por escribir palabras clave SQL (como `SELECT` y` FROM`)
-en mayúsculas y los nombres de los ** campos ** y ** tablsa ** en minúscula. 
-Las consultas de SQL puedes ser muy complejas, de varias líneas de longitud y los suficientemente difíciles
-para leer sin la carga cognitiva adicional de la capitalización aleatoria. 
-Una convención es usar MAYÚSCULAS para las declaraciones de SQL y distinguirlas de tablas y nombres de columnas. 
-Esto es la convención que usaremos para esta lección.
-
-El punto y coma al final de la consulta le dice al gestor de la base de datos que la consulta está completa y lista para ejecutarse.
-Mientras estamos en el tema de la sintaxis de SQL, un aspecto de la sintaxis de SQL
-que puede frustrar tanto a los principiantes como a los expertos es olvidar terminar un
-comando con `;` (punto y coma). Cuando presionas enter para un comando
-sin agregar el `;` al final, puede verse más o menos así:
-
-~~~
-SELECT id FROM Person
-...>
-...>
-~~~
-{: .sql}
-
-Esta es la consola de SQLite esperando comandos adicionales o un `;` para que SQL sepa que debe finalizar. 
-¡Esto es fácil de arreglar! Escribe `;` y presiona enter!
-
-Ahora, volviendo a nuestra consulta SQL anterior, es importante entender que
-las filas y columnas en una tabla de base de datos no se almacenan en ningún orden en particular.
-Siempre se * mostrarán * en algún orden, pero podemos controlar eso de varias maneras.
-Por ejemplo, podríamos intercambiar las columnas en la salida escribiendo nuestra consulta como:
-
-~~~
-SELECT personal, family FROM Person;
-~~~
-{: .sql}
-
-|personal |family  |
-|---------|--------|
-|William  |Dyer    |
-|Frank    |Pabodie |
-|Anderson |Lake    |
-|Valentina|Roerich |
-|Frank    |Danforth|
-
-o incluso repetir columnas:
-
-~~~
-SELECT id, id, id FROM Person;
-~~~
-{: .sql}
-
-|id      |id      |id      |
-|--------|--------|--------|
-|dyer    |dyer    |dyer    |
-|pb      |pb      |pb      |
-|lake    |lake    |lake    |
-|roe     |roe     |roe     |
-|danforth|danforth|danforth|
-
-A modo de atajo, podemos seleccionar todas las columnas de una tabla usando `*`:
-
-~~~
-SELECT * FROM Person;
-~~~
-{: .sql}
-
-|id      |personal |family  |
-|--------|---------|--------|
-|dyer    |William  |Dyer    |
-|pb      |Frank    |Pabodie |
-|lake    |Anderson |Lake    |
-|roe     |Valentina|Roerich |
-|danforth|Frank    |Danforth|
-
-
+>
+>Por ahora, escribamos una consulta SQL que muestre los nombres de los científicos.
+>Hacemos esto usando el comando SQL `SELECT`,
+>dándole los nombres de las columnas que queremos y la tabla de la que las queremos.
+>Nuestra consulta y su salida se ven así:
+>
+>~~~
+>sqlite> SELECT family, personal FROM Person;
+>~~~
+>{: .sql}
+>
+>```
+>Dyer|William
+>Pabodie|Frank
+>Lake|Anderson
+>Roerich|Valentina
+>Danforth|Frank
+>```
+>
+>Podeis cambiar algunas configuraciones de SQLite para que la salida de los resultados sea más fácil de leer.
+>Primero, configura el modo de salida para mostrar columnas alineadas a la izquierda.
+>Luego activa los encabezados de columna.
+>
+>~~~
+>sqlite> .mode column
+>sqlite> .header on
+>sqlite> SELECT family, personal FROM Person;
+> ~~~
+> {: .sql}
+>
+>|family  |personal |
+>|--------|---------|
+>|Dyer    |William  |
+>|Pabodie |Frank    |
+>|Lake    |Anderson |
+>|Roerich |Valentina|
+>|Danforth|Frank    |
+>
+>
+>Como veis, hemos escrito nuestros comandos en mayúsculas y los nombres de la tabla y las columnas.
+>en minúsculas, pero no tenemos porqué como muestra el siguiente ejemplo,
+>SQL es [insensible a mayúsculas y minúsculas]({% link reference.md %}#case-insensitive).
+>
+>~~~
+>SeLeCt FaMiLy, PeRsOnAl FrOm PeRsOn;
+>~~~
+>{: .sql}
+>
+>|family  |personal |
+>|--------|---------|
+>|Dyer    |William  |
+>|Pabodie |Frank    |
+>|Lake    |Anderson |
+>|Roerich |Valentina|
+>|Danforth|Frank    |
+>
+>Es útil separar el uso de la mayúsculas y minúsculas en SQL. Por ejemplo,
+>algunas personas optan por escribir palabras clave SQL (como `SELECT` y` FROM`)
+>en mayúsculas y los nombres de los ** campos ** y ** tablsa ** en minúscula. 
+>Las consultas de SQL puedes ser muy complejas, de varias líneas de longitud y los suficientemente difíciles
+>para leer sin la carga cognitiva adicional de la capitalización aleatoria. 
+>Una convención es usar MAYÚSCULAS para las declaraciones de SQL y distinguirlas de tablas y nombres de columnas. 
+>Esto es la convención que usaremos para esta lección.
+>
+>El punto y coma al final de la consulta le dice al gestor de la base de datos que la consulta está completa y lista para ejecutarse.
+>Mientras estamos en el tema de la sintaxis de SQL, un aspecto de la sintaxis de SQL
+>que puede frustrar tanto a los principiantes como a los expertos es olvidar terminar un
+>comando con `;` (punto y coma). Cuando presionas enter para un comando
+>sin agregar el `;` al final, puede verse más o menos así:
+>
+>~~~
+>SELECT id FROM Person
+>...>
+>...>
+>~~~
+>{: .sql}
+>
+>Esta es la consola de SQLite esperando comandos adicionales o un `;` para que SQL sepa que debe finalizar. 
+>¡Esto es fácil de arreglar! Escribe `;` y presiona enter!
+>
+>Ahora, volviendo a nuestra consulta SQL anterior, es importante entender que
+>las filas y columnas en una tabla de base de datos no se almacenan en ningún orden en particular.
+>Siempre se * mostrarán * en algún orden, pero podemos controlar eso de varias maneras.
+>Por ejemplo, podríamos intercambiar las columnas en la salida escribiendo nuestra consulta como:
+>
+>~~~
+>SELECT personal, family FROM Person;
+>~~~
+>{: .sql}
+>
+>|personal |family  |
+>|---------|--------|
+>|William  |Dyer    |
+>|Frank    |Pabodie |
+>|Anderson |Lake    |
+>|Valentina|Roerich |
+>|Frank    |Danforth|
+>
+>o incluso repetir columnas:
+>
+>~~~
+>SELECT id, id, id FROM Person;
+>~~~
+>{: .sql}
+>
+>|id      |id      |id      |
+>|--------|--------|--------|
+>|dyer    |dyer    |dyer    |
+>|pb      |pb      |pb      |
+>|lake    |lake    |lake    |
+>|roe     |roe     |roe     |
+>|danforth|danforth|danforth|
+>
+>A modo de atajo, podemos seleccionar todas las columnas de una tabla usando `*`:
+>
+>~~~
+>SELECT * FROM Person;
+>~~~
+>{: .sql}
+>
+>|id      |personal |family  |
+>|--------|---------|--------|
+>|dyer    |William  |Dyer    |
+>|pb      |Frank    |Pabodie |
+>|lake    |Anderson |Lake    |
+>|roe     |Valentina|Roerich |
+>|danforth|Frank    |Danforth|
+>
+>
 > De nuevo, para salir de SQLite y volver a la línea de comando del shell,
 > podeis usar `.quit` o` .exit`.
+{: .callout}
 
 
 > ## Comprendiendo las declaraciones CREATE
@@ -315,7 +315,7 @@ SELECT * FROM Person;
 
 > ## Estilo de consultas
 >
-> Muchas personas esceiben las consultas SQL dándole el siguente formato: 
+> Muchas personas escriben las consultas SQL dándole el siguente formato: 
 >
 > ~~~
 > SELECT personal, family FROM person;
