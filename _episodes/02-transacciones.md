@@ -1,271 +1,120 @@
 ---
 title: "Manipulación de datos. Transacciones"
-teaching: 10
-exercises: 10
+teaching: 30
+exercises: 60
 questions:
-- "How can I sort a query's results?"
-- "How can I remove duplicate values from a query's results?"
+- "¿Qué pasa si inserto un registro duplicado?"
+- "¿Si cambia la información de un registro, tengo que cambiarlo en todas las tablas que lo usan?"
 objectives:
-- "Write queries that display results in a particular order."
-- "Write queries that eliminate duplicate values from data."
+- "Insertar datos biológicos"
+- "Claves primarias y únicas"
+- "Referencias entre tablas"
+
 keypoints:
-- "The records in a database table are not intrinsically ordered: if we want to display them in some order, we must specify that explicitly with ORDER BY."
-- "The values in a database are not guaranteed to be unique: if we want to eliminate duplicates, we must specify that explicitly as well using DISTINCT."
+- "BEGIN inicia una transacción."
+- "ROLLBACK cierra la transcacción sin guardar los cambios"
+- "COMMIT cierra la transcacción guardando los cambios"
 ---
-In beginning our examination of the Antarctic data, we want to know:
 
-* what kind of quantity measurements were taken at each site;
-* which scientists took measurements on the expedition;
-* the sites where each scientist took measurements
+A lo largo del dia de hoy, trabajaremos con datos biológicos, de la base de datos de proteinas [Uniprot](http://www.uniprot.org/). De esta base de datos recopilaremos un par de entradas y las insertaremos en la base de datos.
+Con estos datos de prueba, introduciremos la importancia de la creación de las tablas con claves primarias, únicas y con referencias.
+Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actualización se hace de forma muy sencilla. Si esto no es así, cada actualización, puede ser una pesadilla.
 
-To determine which measurements were taken at each site,
-we can examine the `Survey` table.
-Data is often redundant,
-so queries often return redundant information.
-For example,
-if we select the quantities that have been measured
-from the `Survey` table,
-we get this:
-
-~~~
-SELECT quant FROM Survey;
-~~~
-{: .sql}
-
-|quant|
-|-----|
-|rad  |
-|sal  |
-|rad  |
-|sal  |
-|rad  |
-|sal  |
-|temp |
-|rad  |
-|sal  |
-|temp |
-|rad  |
-|temp |
-|sal  |
-|rad  |
-|sal  |
-|temp |
-|sal  |
-|rad  |
-|sal  |
-|sal  |
-|rad  |
-
-This result makes it difficult to see all of the different types of
-`quant` in the Survey table.  We can eliminate the redundant output to
-make the result more readable by adding the `DISTINCT` keyword to our
-query:
-
-~~~
-SELECT DISTINCT quant FROM Survey;
-~~~
-{: .sql}
-
-|quant|
-|-----|
-|rad  |
-|sal  |
-|temp |
-
-If we want to determine which visit (stored in the `taken` column)
-have which `quant` measurement,
-we can use the `DISTINCT` keyword on multiple columns.
-If we select more than one column,
-distinct *sets* of values are returned
-(in this case *pairs*, because we are selecting two columns):
-
-~~~
-SELECT DISTINCT taken, quant FROM Survey;
-~~~
-{: .sql}
-
-|taken|quant|
-|-----|-----|
-|619  |rad  |
-|619  |sal  |
-|622  |rad  |
-|622  |sal  |
-|734  |rad  |
-|734  |sal  |
-|734  |temp |
-|735  |rad  |
-|735  |sal  |
-|735  |temp |
-|751  |rad  |
-|751  |temp |
-|751  |sal  |
-|752  |rad  |
-|752  |sal  |
-|752  |temp |
-|837  |rad  |
-|837  |sal  |
-|844  |rad  |
-
-Notice in both cases that duplicates are removed
-even if the rows they come from didn't appear to be adjacent in the database table.
-
-
-Our next task is to identify the scientists on the expedition by looking at the `Person` table.
-As we mentioned earlier,
-database records are not stored in any particular order.
-This means that query results aren't necessarily sorted,
-and even if they are,
-we often want to sort them in a different way,
-e.g., by their identifier instead of by their personal name.
-We can do this in SQL by adding an `ORDER BY` clause to our query:
-
-~~~
-SELECT * FROM Person ORDER BY id;
-~~~
-{: .sql}
-
-|id     |personal |family  |
-|-------|---------|--------|
-|danfort|Frank    |Danforth|
-|dyer   |William  |Dyer    |
-|lake   |Anderson |Lake    |
-|pb     |Frank    |Pabodie |
-|roe    |Valentina|Roerich |
-
-By default, when we use ORDER BY
-results are sorted in ascending order of the column we specify
-(i.e.,
-from least to greatest).
-
-We can sort in the opposite order using `DESC` (for "descending"):
-
-> ## A note on ordering
+> ## 1. Tabla con referencias externas.
+> Descargad el fichero [initial.sql]({{ page.root }}/files/initial.sql), copiadlo
+> a vuestra carpeta de trabajo y abrirlo con un editor de texto. Vamos a repasar cada una de las sentencias que ahí aparecen, haciendo énfasis en las **claves primarias**, los **registros únicos** y las **referencias externas**:
 >
-> While it may look that the records are consistent every time we ask for them in this lesson, that is because no one has changed or modified any of the data so far. Remember to use ORDER BY if you want the rows returned to have any sort of consistent or predictable order.
+>
+>
+> ~~~
+> CREATE TABLE SWISSENTRY (
+>         accnumber VARCHAR(10) NOT NULL,
+>         id VARCHAR(25) NOT NULL,
+>         lastupd DATE NOT NULL DEFAULT CURRENT_DATE,
+>         description VARCHAR(1000),
+>         seq TEXT NOT NULL,
+>         molweight NUMERIC(9,0) NOT NULL,
+>         PRIMARY KEY (accnumber),
+>         UNIQUE (id)
+> );
+> 
+> CREATE TABLE ACCNUMBERS (
+>         main_accnumber VARCHAR(10) NOT NULL,
+>         accnumber VARCHAR(10) NOT NULL,
+>         PRIMARY KEY (main_accnumber,accnumber),
+>         FOREIGN KEY (main_accnumber) REFERENCES SWISSENTRY (accnumber)
+>                 ON DELETE CASCADE ON UPDATE CASCADE
+> );
+> ~~~
+> {: .sql}
+>
+> 
+> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](http://www.uniprot.org/uniprot/?query=*&random=yes) (una vez en la página, pinchad en Format->Text).
+>
+> Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer.
+>
+>
+> Si no ha habido ningún error, tendréis dos resultados de la querie anterior. Cómo habeis visto, de esta forma podemos insertar varios registros de una vez. Pero aún así esto no es
+> muy útil porque al fin y al cabo, tenemos que escribir toda la información en un fichero. ¿Qué pasaría si tenemos que insertar las proteínas de un organismos entero?.
+> Pues esto lo veremos más adelante.
+>
+> ## 2. Clave única | primaria
+>Clave única
+>La clave única o UNIQUE hace que en la columna que la posee no pueda tener dos datos iguales. Es decir en cada registro, el campo marcado con UNIQUE debe tener un dato diferente. Esto lo convierte en un identificador del registro, ya que no puede haber dos registros que contengan el mismo dato en esa columna.
+>Puede haber varias claves únicas en una tabla. La clave única la podemos marcar al crear la tabla, por ejemplo:
+>>CREATE TABLE miagenda (
+>      nombre VARCHAR(255) NOT NULL,
+>      telefono1 INT NOT NULL UNIQUE,
+>      telefono2 INT,
+>      email VARCHAR(255) NOT NULL UNIQUE
+>      );
+>
+>Vemos en este ejemplo cómo al crear la tabla "miagenda" los campos "telefono1" y "email" les hemos asignado una clave única mediante la palabra reservada "UNIQUE". Les hemos asignado también la restricción "NOT NULL", aunque no es obligatorio, es conveniente hacerlo así, de otra manera en el campo sólo se permitiría un registro con valor nulo (ya que otro registro nulo se consideraría repetido).
+>>En una tabla ya creada, podemos añadir un registro único a un campo ya existente, o que creamos más tarde, indicandolo en la instrucción "ALTER TABLE" de la siguiente manera:
+>ALTER TABLE miagenda
+>    ADD direccion VARCHAR(255),
+>    ADD UNIQUE (direccion),
+>    ADD UNIQUE (telefono2); 
+>
+>Creamos primero un nuevo campo en la tabla llamado "direccion", y después mediante "ADD UNIQUE (direccion)", lo convertimos en un campo con clave única. También añadimos una clave única al campo ya existente "telefono2", de la misma manera que para la anterior es decir mediante "ADD UNIQUE (telefono2)".
+>Cada una de estas instrucciones incluidas en "ALTER TABLE" irán separadas entre sí por comas.
+>Para eliminar una clave unica utilizaremos la instrucción:
+ALTER TABLE nombre_tabla DROP INDEX nombre_columna;
+>Es decir es otra instruccion dentro de "ALTER TABLE". Lo de DROP INDEX es porque en realidad una clave única se considera un índice para buscar elementos en la tabla.
+>Aunque aquí hemos puesto "nombre_columna", en realidad deberíamos haber puesto "nombre_clave". La clave recibe un nombre que, si la hemos creado mediante php en la web coincide con el nombre de la columna. Sin embargo si creamos la clave única por otros medios (por ejemplo mediante phpmyadmin) podemos ponerle otro nombre distinto del de la columna. En este caso en lugar del nombre de la columna pondremos el nombre que le hayamos dado a la clave.
+>
+> La clave primaria, o **PRIMARY KEY** es el verdadero identificador de cada registro. Sólo puede haber una columna con clave primaria por tabla, y los registros deben ser también únicos, es decir no pueden estar repetidos ni ser nulos.
+>La clave primaria es fundamental para crear relaciones entre varias tablas, ya que es esta clave la que identifica el registro que debe ser complementado con datos de otra tabla.
+>
+>Normalmente se crea una columna especial para incluir la clave primaria, que en la mayoría de las tablas llaman "id" o "id_nombretabla". Los valores de los registros suelen ser números enteros que identifican a cada uno de los registros que se crean en la tabla.
+>Como habeis visto arriba, lo normal es crear las columnas de la tabla, y posteriormente indicamos mediante la instrucción PRIMARY KEY la columna que debe ser la clave primaria. 
+> ~~~
+>PRIMARY KEY (accnumber),
+> ~~~
+> {: .sql}
+>Al crear esta columna debemos ponerle la instrucción **NOT NULL** para que pueda ser una clave primaria. No tendría lógica crear un campo de tanta importancia y permitir que sea **NULL**.
+>Si tenemos una tabla ya creada, podemos indicar qué columna será la clave primaria mediante la instrucción:
+> ~~~
+>ALTER TABLE prueba1
+>ADD PRIMARY KEY (id_prueba1)
+> ~~~
+> {: .sql}
+>
+>Para eliminar la clave primaria de una tabla utilizaremos la instrucción:
+> ~~~
+>ALTER TABLE nombre_tabla DROP PRIMARY KEY
+> ~~~
+> {: .sql}
+>
+>Cómo la clave primaria es única no necesitamos poner el nombre de la columna en la que está para eliminarla.
+>
 {: .callout}
-~~~
-SELECT * FROM person ORDER BY id DESC;
-~~~
-{: .sql}
 
-|id     |personal |family  |
-|-------|---------|--------|
-|roe    |Valentina|Roerich |
-|pb     |Frank    |Pabodie |
-|lake   |Anderson |Lake    |
-|dyer   |William  |Dyer    |
-|danfort|Frank    |Danforth|
-
-(And if we want to make it clear that we're sorting in ascending order,
-we can use `ASC` instead of `DESC`.)
-
-
-In order to look at which scientist measured quantities during each visit,
-we can look again at the `Survey` table.
-We can also sort on several fields at once.
-For example,
-this query sorts results first in ascending order by `taken`,
-and then in descending order by `person`
-within each group of equal `taken` values:
-
-~~~
-SELECT taken, person, quant FROM Survey ORDER BY taken ASC, person DESC;
-~~~
-{: .sql}
-
-|taken|person|quant|
-|-----|------|-----|
-|619  |dyer  |rad  |
-|619  |dyer  |sal  |
-|622  |dyer  |rad  |
-|622  |dyer  |sal  |
-|734  |pb    |rad  |
-|734  |pb    |temp |
-|734  |lake  |sal  |
-|735  |pb    |rad  |
-|735  |-null-|sal  |
-|735  |-null-|temp |
-|751  |pb    |rad  |
-|751  |pb    |temp |
-|751  |lake  |sal  |
-|752  |roe   |sal  |
-|752  |lake  |rad  |
-|752  |lake  |sal  |
-|752  |lake  |temp |
-|837  |roe   |sal  |
-|837  |lake  |rad  |
-|837  |lake  |sal  |
-|844  |roe   |rad  |
-
-This query gives us a good idea of which scientist was involved in which visit,
-and what measurements they performed during the visit.
-
-Looking at the table, it seems like some scientists specialized in
-certain kinds of measurements.  We can examine which scientists
-performed which measurements by selecting the appropriate columns and
-removing duplicates.
-
-~~~
-SELECT DISTINCT quant, person FROM Survey ORDER BY quant ASC;
-~~~
-{: .sql}
-
-|quant|person|
-|-----|------|
-|rad  |dyer  |
-|rad  |pb    |
-|rad  |lake  |
-|rad  |roe   |
-|sal  |dyer  |
-|sal  |lake  |
-|sal  |-null-|
-|sal  |roe   |
-|temp |pb    |
-|temp |-null-|
-|temp |lake  |
-
-> ## Finding Distinct Dates
+> ## 3. Referencias externas
 >
-> Write a query that selects distinct dates from the `Visited` table.
+>ejemplo del UPDATE
 >
-> > ## Solution
-> > 
-> > ~~~
-> > SELECT DISTINCT dated FROM Visited;
-> > ~~~
-> > {: .sql}
-> >
-> > |dated     |
-> > |----------|
-> > |1927-02-08|
-> > |1927-02-10|
-> > |1930-01-07|
-> > |1930-01-12|
-> > |1930-02-26|
-> > |&nbsp;    |
-> > |1932-01-14|
-> > |1932-03-22|
-> {: .solution}
-{: .challenge}
+{: .callout}
 
-> ## Displaying Full Names
->
-> Write a query that displays the full names of the scientists in the `Person` table,
-> ordered by family name.
->
-> > ## Solution
-> > 
-> > ~~~
-> > SELECT personal, family FROM Person ORDER BY family ASC;
-> > ~~~
-> > {: .sql}
-> >
-> > |personal  |family    |
-> > |----------|----------|
-> > |Frank     |Danforth  |
-> > |William   |Dyer      |
-> > |Anderson  |Lake      |
-> > |Frank     |Pabodie   |
-> > |Valentina |Roerich   |
-> {: .solution}
-{: .challenge}
+
+
