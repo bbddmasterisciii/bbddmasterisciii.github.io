@@ -197,7 +197,7 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 >
 >Es útil separar el uso de la mayúsculas y minúsculas en SQL. Por ejemplo,
 >algunas personas optan por escribir palabras clave SQL (como `SELECT` y` FROM`)
->en mayúsculas y los nombres de los ** campos ** y ** tablsa ** en minúscula. 
+>en mayúsculas y los nombres de los **campos** y **tablas** en minúscula. 
 >Las consultas de SQL puedes ser muy complejas, de varias líneas de longitud y los suficientemente difíciles
 >para leer sin la carga cognitiva adicional de la capitalización aleatoria. 
 >Una convención es usar MAYÚSCULAS para las declaraciones de SQL y distinguirlas de tablas y nombres de columnas. 

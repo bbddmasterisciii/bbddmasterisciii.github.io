@@ -211,7 +211,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > SELECT * FROM libros;
 > ~~~
 > {: .sql} 
-> En el caso de que siga exisistiendo el libro, comprobad que el PRAGAy está activado y probad de nuevo:
+> En el caso de que no se haya borrado y por lo tanto siga exisistiendo el libro, comprobad que el PRAGMA está activado y probad de nuevo:
 > ~~~
 > INSERT INTO autores VALUES(2, "Paco Cepeda","Argentino");
 > PRAGMA foreign_keys = ON;
