@@ -6,9 +6,9 @@ questions:
 - "¿Qué pasa si inserto un registro duplicado?"
 - "¿Si cambia la información de un registro, tengo que cambiarlo en todas las tablas que lo usan?"
 objectives:
-- "Insertar datos biológicos"
 - "Claves primarias y únicas"
 - "Referencias entre tablas"
+- "Insertar datos biológicos"
 
 keypoints:
 - "Las claves únicas nos permiten evitar tener datos dupicados (muy útil para guardar identificadores, como el DNI)"
@@ -20,46 +20,7 @@ A lo largo del dia de hoy, trabajaremos con datos biológicos, de la base de dat
 Con estos datos de prueba, introduciremos la importancia de la creación de las tablas con claves primarias, únicas y con referencias.
 Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actualización se hace de forma muy sencilla. Si esto no es así, cada actualización, puede ser una pesadilla.
 
-> ## 1. Tabla con referencias externas.
-> Descargad el fichero [initial.sql]({{ page.root }}/files/initial.sql), copiadlo
-> a vuestra carpeta de trabajo y abrirlo con un editor de texto. Vamos a repasar cada una de las sentencias que ahí aparecen, haciendo énfasis en las **claves primarias**, los **registros únicos** y las **referencias externas**:
->
->
->
-> ~~~
-> CREATE TABLE SWISSENTRY (
->         accnumber VARCHAR(10) NOT NULL,
->         id VARCHAR(25) NOT NULL,
->         lastupd DATE NOT NULL DEFAULT CURRENT_DATE,
->         description VARCHAR(1000),
->         seq TEXT NOT NULL,
->         molweight NUMERIC(9,0) NOT NULL,
->         PRIMARY KEY (accnumber),
->         UNIQUE (id)
-> );
-> 
-> CREATE TABLE ACCNUMBERS (
->         main_accnumber VARCHAR(10) NOT NULL,
->         accnumber VARCHAR(10) NOT NULL,
->         PRIMARY KEY (main_accnumber,accnumber),
->         FOREIGN KEY (main_accnumber) REFERENCES SWISSENTRY (accnumber)
->                 ON DELETE CASCADE ON UPDATE CASCADE
-> );
-> ~~~
-> {: .sql}
->
-> 
-> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](http://www.uniprot.org/uniprot/?query=*&random=yes) (una vez en la página, pinchad en Format->Text).
->
-> Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer.
->
->
-> Si no ha habido ningún error, tendréis dos resultados de la querie anterior. Cómo habeis visto, de esta forma podemos insertar varios registros de una vez. Pero aún así esto no es
-> muy útil porque al fin y al cabo, tenemos que escribir toda la información en un fichero. ¿Qué pasaría si tenemos que insertar las proteínas de un organismos entero?.
-> Pues esto lo veremos más adelante.
->
-{: .callout}
-> ## 2. Clave única | primaria
+> ## 1. Clave única | primaria
 >Clave única
 >La clave única o `UNIQUE` hace que en la columna que la posee no pueda tener dos datos iguales. Es decir en cada registro, el campo marcado con UNIQUE debe tener un dato diferente. Esto lo convierte en un identificador del registro, ya que no puede haber dos registros que contengan el mismo dato en esa columna.
 >Puede haber varias claves únicas en una tabla.
@@ -123,7 +84,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >
 {: .callout}
 
-> ## 3. Claves externas
+> ## 2. Claves externas
 >La clave externa crea una relación entre tablas, de forma que la columna a la que se le aplica se relaciona con la columna de la clave primaria de otra tabla. Por lo tanto para crear una clave externa necesitamos tener otra tabla con una clave primaria.
 >Se crea una relación en la que en la que podemos obtener datos de la otra tabla que estén relacionados con la tabla actual. Por ejemplo si tenemos dos tablas, una para "autores" y otra para "libros", poniendo en la tabla "libros" una referencia externa a la tabla "autores" relacionamos a cada libro con su autor.
 >Podemos crear una clave externa al crear la tabla, por ejemplo, suponemos que tenemos una base de datos "mislibros" y ahi crearemos dos tablas: "autores" y "libros". 
@@ -222,4 +183,43 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 {: .callout}
 
 
+> ## 3. Ejemplo biológico.
+> Descargad el fichero [initial.sql]({{ page.root }}/files/initial.sql), copiadlo
+> a vuestra carpeta de trabajo y abrirlo con un editor de texto. Vamos a repasar cada una de las sentencias que ahí aparecen, haciendo énfasis en las **claves primarias**, los **registros únicos** y las **referencias externas**:
+>
+>
+>
+> ~~~
+> CREATE TABLE SWISSENTRY (
+>         accnumber VARCHAR(10) NOT NULL,
+>         id VARCHAR(25) NOT NULL,
+>         lastupd DATE NOT NULL DEFAULT CURRENT_DATE,
+>         description VARCHAR(1000),
+>         seq TEXT NOT NULL,
+>         molweight NUMERIC(9,0) NOT NULL,
+>         PRIMARY KEY (accnumber),
+>         UNIQUE (id)
+> );
+> 
+> CREATE TABLE ACCNUMBERS (
+>         main_accnumber VARCHAR(10) NOT NULL,
+>         accnumber VARCHAR(10) NOT NULL,
+>         PRIMARY KEY (main_accnumber,accnumber),
+>         FOREIGN KEY (main_accnumber) REFERENCES SWISSENTRY (accnumber)
+>                 ON DELETE CASCADE ON UPDATE CASCADE
+> );
+> ~~~
+> {: .sql}
+>
+> 
+> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](http://www.uniprot.org/uniprot/?query=*&random=yes) (una vez en la página, pinchad en Format->Text).
+>
+> Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer.
+>
+>
+> Si no ha habido ningún error, tendréis dos resultados de la querie anterior. Cómo habeis visto, de esta forma podemos insertar varios registros de una vez. Pero aún así esto no es
+> muy útil porque al fin y al cabo, tenemos que escribir toda la información en un fichero. ¿Qué pasaría si tenemos que insertar las proteínas de un organismos entero?.
+> Pues esto lo veremos más adelante.
+>
+{: .callout}
 
