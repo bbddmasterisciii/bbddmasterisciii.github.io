@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
+<title>uniprotInsert.py</title>
+</head>
+<body>
+<pre style='color:#181615;background-color:#ffffff;'>
+<i><span style='color:#898887;'>#!/usr/bin/env python3</span></i>
+<i><span style='color:#898887;'># -*- coding: utf-8 -*-</span></i>
+
+<i><span style='color:#898887;'>'''</span></i>
+<i><span style='color:#898887;'>	PrÃ¡cticas de Python DB-API 2.0 (PEP-249) y bases de datos biolÃ³gicas</span></i>
+<i><span style='color:#898887;'>	Script de inserciÃ³n de entradas en formato SWISSPROT en la base de datos</span></i>
+<i><span style='color:#898887;'>'''</span></i>
+
+<span style='color:#ff80e0;'>import</span> sys
+<span style='color:#ff80e0;'>import</span> re
+<span style='color:#ff80e0;'>import</span> sqlite3<span style='color:#ff80e0;'>as</span> dbi
+
+<i><span style='color:#898887;'>'''</span></i>
+<i><span style='color:#898887;'>Estas variables globales contienen los parÃ¡metros de conexiÃ³n a la base de datos</span></i>
+<i><span style='color:#898887;'>'''</span></i>
+
+dbname<b>=</b><span style='color:#bf0303;'>'uniprot.db'</span>	<i><span style='color:#898887;'># El nombre de la base de datos, que tendrÃ©is que cambiarlo</span></i>
+
+
+<b>class</b> SWParser(<span style='color:#0057ae;'>object</span>):
+	<b>def</b> <b><span style='color:#000e52;'>__init__</span></b>(<span style='color:#006e28;'>self</span>,filename):
+		<span style='color:#006e28;'>self</span>.filename <b>=</b> filename
+	
+	<b>def</b> <b><span style='color:#000e52;'>__iter__</span></b>(<span style='color:#006e28;'>self</span>):
+		<i><span style='color:#898887;'># Estamos abriendo el fichero con el encoding 'latin-1'</span></i>
+		<i><span style='color:#898887;'># Para text mining lo recomendable es el encoding 'utf-8'</span></i>
+		<span style='color:#006e28;'>self</span>.infile <b>=</b> <span style='color:#0057ae;'>open</span>(<span style='color:#006e28;'>self</span>.filename,<span style='color:#bf0303;'>'r'</span>,encoding<b>=</b><span style='color:#bf0303;'>&quot;latin-1&quot;</span>)
+		<b>print</b>(<span style='color:#bf0303;'>&quot;Procesando fichero &quot;</span>,<span style='color:#006e28;'>self</span>.filename)
+		
+		<b>return</b> <span style='color:#006e28;'>self</span>
+	
+	<b>def</b> __next__(<span style='color:#006e28;'>self</span>):
+		<i><span style='color:#898887;'># InicializaciÃ³n de variables</span></i>
+		acc <b>=</b> []
+		<span style='color:#0057ae;'>id</span> <b>=</b> <span style='color:#bf0303;'>''</span>
+		lastdate <b>=</b> <span style='color:#bf0303;'>''</span>
+		description <b>=</b> <span style='color:#bf0303;'>''</span>
+		sequence <b>=</b> <span style='color:#bf0303;'>''</span>
+		molw <b>=</b> <span style='color:#bf0303;'>''</span>
+		readingseq <b>=</b> <span style='color:#006e28;'>False</span>
+		<b>for</b> line <b>in</b> <span style='color:#006e28;'>self</span>.infile:
+			<i><span style='color:#898887;'># Lo primero, quitar el salto de lÃ­nea</span></i>
+			line <b>=</b> line.rstrip(<span style='color:#bf0303;'>'</span><span style='color:#ff80e0;'>\n</span><span style='color:#bf0303;'>'</span>)
+			
+			<i><span style='color:#898887;'># DetecciÃ³n del final del registro</span></i>
+			<b>if</b> re.search(<span style='color:#bf0303;'>'^//'</span>,line) <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>:
+				<i><span style='color:#898887;'># Cuando se ha terminado de leer un</span></i>
+				<i><span style='color:#898887;'># registro hay que proceder a guardar</span></i>
+				<i><span style='color:#898887;'># los datos en la base de datos</span></i>
+				
+				<b>if</b> description <b>==</b> <span style='color:#bf0303;'>''</span>:
+					description <b>=</b> <span style='color:#006e28;'>None</span>
+				
+				<i><span style='color:#898887;'># ImpresiÃ³n de comprobaciÃ³n</span></i>
+				<b>print</b>(<span style='color:#bf0303;'>&quot;ACC: {0} ; ID: {1} ; Last: {2}&quot;</span>.<span style='color:#0057ae;'>format</span>(acc[<span style='color:#b08000;'>0</span>],<span style='color:#0057ae;'>id</span>,lastdate))
+				
+				<b>return</b> acc,<span style='color:#0057ae;'>id</span>,lastdate,description,sequence,molw
+			
+			<i><span style='color:#898887;'># Â¿Estoy leyendo una secuencia?</span></i>
+			<b>if</b> readingseq:
+				<i><span style='color:#898887;'># Quito todos los espacios intermedios </span></i>
+				line <b>=</b> re.<span style='color:#0057ae;'>compile</span>(<span style='color:#bf0303;'>r&quot;\s+&quot;</span>).sub(<span style='color:#bf0303;'>''</span>,line)
+				
+				<i><span style='color:#898887;'># Y concateno</span></i>
+				sequence <b>+=</b> line
+				
+			<i><span style='color:#898887;'># Como no la estoy leyendo, busco los patrones apropiados</span></i>
+			<b>else</b>:
+				seqmatch <b>=</b> re.search(<span style='color:#bf0303;'>r&quot;^SQ.+[^0-9](\d+) MW&quot;</span>,line)
+				matched <b>=</b> seqmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>
+				
+				idmatch <b>=</b> <span style='color:#006e28;'>None</span> <b>if</b> matched <b>else</b> re.search(<span style='color:#bf0303;'>r&quot;^ID   ([a-zA-Z0-9_]+)&quot;</span>,line)
+				matched <b>=</b> matched <b>or</b> idmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>
+				
+				dtmatch <b>=</b> <span style='color:#006e28;'>None</span> <b>if</b> matched <b>else</b> re.search(<span style='color:#bf0303;'>r&quot;^DT   (\d{2}-[A-Z]{3}-\d{4}),&quot;</span>,line)
+				matched <b>=</b> matched <b>or</b> dtmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>
+				
+				acmatch <b>=</b> <span style='color:#006e28;'>None</span> <b>if</b> matched <b>else</b> re.search(<span style='color:#bf0303;'>r&quot;^AC   (.+)&quot;</span>,line)
+				matched <b>=</b> matched <b>or</b> acmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>
+				
+				dematch <b>=</b> <span style='color:#006e28;'>None</span> <b>if</b> matched <b>else</b> re.search(<span style='color:#bf0303;'>r&quot;^DE   RecName: Full=(.+);&quot;</span>,line)
+				matched <b>=</b> matched <b>or</b> dematch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>
+				
+				<b>if</b> matched:
+					<b>if</b> seqmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>:
+						<i><span style='color:#898887;'># ExtracciÃ³n del peso molecular</span></i>
+						<i><span style='color:#898887;'># y comienzo de secuencia</span></i>
+						molw <b>=</b> seqmatch.group(<span style='color:#b08000;'>1</span>)
+						
+						readingseq <b>=</b> <span style='color:#006e28;'>True</span>
+					<b>elif</b> idmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>:
+						<i><span style='color:#898887;'># Identificador</span></i>
+						<span style='color:#0057ae;'>id</span> <b>=</b> idmatch.group(<span style='color:#b08000;'>1</span>)
+					<b>elif</b> dtmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>:
+						<i><span style='color:#898887;'># Fecha de la Ãºltima actualizaciÃ³n</span></i>
+						lastdate <b>=</b> dtmatch.group(<span style='color:#b08000;'>1</span>)
+					<b>elif</b> acmatch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>:
+						<i><span style='color:#898887;'># Los accnumber, que pueden estar en varias lÃ­neas</span></i>
+						ac <b>=</b> acmatch.group(<span style='color:#b08000;'>1</span>)
+						<i><span style='color:#898887;'># Elimino los espacios y quito el posible Ãºltimo punto y coma</span></i>
+						ac <b>=</b> re.<span style='color:#0057ae;'>compile</span>(<span style='color:#bf0303;'>r&quot;\s+&quot;</span>).sub(<span style='color:#bf0303;'>''</span>,ac).rstrip(<span style='color:#bf0303;'>';'</span>)
+						
+						<i><span style='color:#898887;'># Rompo por los puntos y coma, y</span></i>
+						<i><span style='color:#898887;'># aÃ±ado a la lista de accnumber</span></i>
+						acc.extend(ac.split(<span style='color:#bf0303;'>';'</span>))
+					<b>elif</b> dematch <b>is</b> <b>not</b> <span style='color:#006e28;'>None</span>:
+						<i><span style='color:#898887;'># La descripciÃ³n, que puede estar en varias lÃ­neas</span></i>
+						<b>if</b> description <b>!=</b> <span style='color:#bf0303;'>''</span>:
+							description <b>+=</b> <span style='color:#bf0303;'>', EC '</span>
+						description <b>+=</b> dematch.group(<span style='color:#b08000;'>1</span>)
+		
+		<i><span style='color:#898887;'># Se cierra el fichero procesado</span></i>
+		<span style='color:#006e28;'>self</span>.infile.close()
+		
+		<i><span style='color:#898887;'># Y como hemos terminado, lo indicamos</span></i>
+		<b>raise</b> <b><span style='color:#054d00;'>StopIteration</span></b>
+
+
+<i><span style='color:#898887;'># ComprobaciÃ³n del nÃºmero de parÃ¡metros de entrada</span></i>
+<b>if</b> <span style='color:#0057ae;'>__name__</span> <b>==</b> <span style='color:#bf0303;'>'__main__'</span>:
+	<b>if</b> <span style='color:#0057ae;'>len</span>(sys.argv)<b>&gt;</b><span style='color:#b08000;'>1</span>:
+		<i><span style='color:#898887;'># Apertura de la conexiÃ³n con la base de datos</span></i>
+		<b>try</b>:
+			conn <b>=</b> dbi.<b><span style='color:#0095ff;'>connect</span></b>(host<b>=</b>dbhost,database<b>=</b>dbname,user<b>=</b>dbuser,password<b>=</b>dbpass)
+			<i><span style='color:#898887;'># Esto sirve para que cada sentencia se ejecute inmediatamente</span></i>
+			<i><span style='color:#898887;'>#conn.autocommit = True</span></i>
+		<b>except</b> dbi.Error <span style='color:#ff80e0;'>as</span> e:
+			<b>print</b>(<span style='color:#bf0303;'>&quot;Ha habido un problema al conectar a la base de datos: &quot;</span>,e.diag.message_primary,<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
+			<b>raise</b>
+		
+		<i><span style='color:#898887;'># Procesamiento de cada fichero</span></i>
+		<b>with</b> conn:
+			<b>for</b> infile <b>in</b> sys.argv[<span style='color:#b08000;'>1</span>:]:
+				<b>try</b>:
+					<i><span style='color:#898887;'># ObtenciÃ³n de un cursor para enviar operaciones a la base de datos</span></i>
+					<b>with</b> conn = dbi.connect(dbname) <span style='color:#ff80e0;'>as</span> cur:
+						<b>for</b> acc,<span style='color:#0057ae;'>id</span>,lastdate,description,sequence,molw <b>in</b> <span style='color:#0057ae;'>iter</span>(SWParser(infile)):
+							<i><span style='color:#898887;'># PreparaciÃ³n de las operaciones de inserciÃ³n a realizar repetidamente</span></i>
+							<i><span style='color:#898887;'># (DeberÃ­a hacer un chequeo aquÃ­, para comprobar que funcionan)</span></i>
+							cur.execute(<span style='color:#bf0303;'>'INSERT INTO SWISSENTRY VALUES (</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>,</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>,</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>,</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>,</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>,</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>)'</span>,(acc[<span style='color:#b08000;'>0</span>],<span style='color:#0057ae;'>id</span>,lastdate,description,sequence,molw))
+							<b>for</b> accnumber <b>in</b> acc:
+								cur.execute(<span style='color:#bf0303;'>'INSERT INTO ACCNUMBERS(main_accnumber,accnumber) VALUES (</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>,</span><span style='color:#0057ae;'>%s</span><span style='color:#bf0303;'>)'</span>,(acc[<span style='color:#b08000;'>0</span>],accnumber))
+				<b>except</b> dbi.Error <span style='color:#ff80e0;'>as</span> e:
+					<b>print</b>(<span style='color:#bf0303;'>&quot;Error al insertar en la base de datos: &quot;</span>,e.diag.message_primary,<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
+					<b>raise</b>
+				<b>except</b> <b><span style='color:#054d00;'>IOError</span></b> <span style='color:#ff80e0;'>as</span> e:
+					<b>print</b>(<span style='color:#bf0303;'>&quot;Error de lectura de fichero {0}: {1}&quot;</span>.<span style='color:#0057ae;'>format</span>(e.errno, e.strerror),<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
+					<i><span style='color:#898887;'>#raise</span></i>
+				<b>except</b>:
+					<b>print</b>(<span style='color:#bf0303;'>&quot;Error inesperado: &quot;</span>, sys.exc_info()[<span style='color:#b08000;'>0</span>],<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
+					<b>raise</b>
+		
+	<b>else</b>:
+		<b>raise</b> <b><span style='color:#054d00;'>AssertionError</span></b>(<span style='color:#bf0303;'>&quot;Debes introducir al menos un fichero con formato SW.&quot;</span>)
+</pre>
+</body>
+</html>

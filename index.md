@@ -23,7 +23,7 @@ forma automática gracias a la programación en Python.
 >
 > ## Prerequisitos
 >
-> * Estas practicas requieren de una shell de Unix, de [SQLite3](http://www.sqlite.org/), de [Python 3.7](https://www.python.org/downloads/) o superior y del paquete [PySQLite](https://pypi.org/project/pysqlite/).
+> * Estas practicas requieren de una shell de Unix, de [SQLite3](http://www.sqlite.org/) y de [Python 3.7](https://www.python.org/downloads/) o superior.
 >
 {: .prereq}
 

@@ -3,7 +3,7 @@ layout: page
 title: Setup
 ---
 # Software
-Para este curso, principalmente necesitarás una shell de Unix, [SQLite3](http://www.sqlite.org/), [Python 3.7](https://www.python.org/downloads/) o superior y el paquete [PySQLite](https://pypi.org/project/pysqlite/).
+Para este curso, principalmente necesitarás una shell de Unix, [SQLite3](http://www.sqlite.org/) y [Python 3.7](https://www.python.org/downloads/) o superior.
 
 Si estas trabajando en una máquina Linux, como Ubuntu, lo más seguro es que ya tengas este programa instalado.
 Por favor, desde la consola usa el comando `which sqlite3` para ver el path al programa. Si al ejecutar este comando no
