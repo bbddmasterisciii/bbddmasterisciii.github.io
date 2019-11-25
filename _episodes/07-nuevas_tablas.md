@@ -1,5 +1,5 @@
 ---
-title: "Combining Data"
+title: "Nuevas tablas"
 teaching: 20
 exercises: 20
 questions:

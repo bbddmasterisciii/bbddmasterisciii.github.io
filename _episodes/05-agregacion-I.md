@@ -1,5 +1,5 @@
 ---
-title: "Creación de nuevas tablas. Creación de nuevos scripts."
+title: "Creación de nuevas tablas. Creación de un script"
 teaching: 15
 exercises: 15
 questions:

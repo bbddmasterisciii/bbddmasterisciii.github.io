@@ -1,5 +1,5 @@
 ---
-title: "Manipulación de datos. Transacciones"
+title: "Manipulación de datos"
 teaching: 30
 exercises: 60
 questions:
@@ -214,7 +214,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > 
 > Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](http://www.uniprot.org/uniprot/?query=*&random=yes) (una vez en la página, pinchad en Format->Text).
 >
-> Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer.
+> Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer. No olvideis que son dos tablas y en ambas hay que insertar los dos registros.
 >
 >
 > Si no ha habido ningún error, tendréis dos resultados de la querie anterior. Cómo habeis visto, de esta forma podemos insertar varios registros de una vez. Pero aún así esto no es

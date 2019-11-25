@@ -1,5 +1,5 @@
 ---
-title: "Aggregation"
+title: "Consultas de agregación II"
 teaching: 10
 exercises: 10
 questions:
