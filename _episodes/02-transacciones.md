@@ -117,7 +117,6 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >Ahora insertamos datos en la tabla libros:
 > ~~~
 > INSERT INTO libros VALUES(1, "Paradysso", "Libro de ciencia ficción sobre marcianos", 1);
->
 > ~~~
 > {: .sql} 
 > He guardado un nuevo libro, escrito por Juan Morientes, pero **ERROR!**, el escritor es Paco Cepeda !!!!!. Como hago para cambiarlo en la tabla libros ¿?
