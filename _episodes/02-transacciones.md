@@ -29,8 +29,8 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > ~~~
 > CREATE TABLE miagenda (
 >      nombre VARCHAR(255) NOT NULL,
->      telefono1 INT NOT NULL UNIQUE,
->      telefono2 INT,
+>      telefono1 INTEGER NOT NULL UNIQUE,
+>      telefono2 INTEGER,
 >      email VARCHAR(255) NOT NULL UNIQUE
 >      );
 > ~~~
