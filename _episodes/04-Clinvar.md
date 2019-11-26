@@ -12,16 +12,11 @@ keypoints:
 - "Casi cualquier gestor de base de datos tiene un interfaz de consulta para ser usado desde cualquier lenguaje de programación"
 - "Para SQLite se usa el paquete sqlite3"
 ---
-Real-world data is never complete --- there are always holes.
-Databases represent these holes using a special value called `null`.
-`null` is not zero, `False`, or the empty string;
-it is a one-of-a-kind value that means "nothing here".
-Dealing with `null` requires a few special tricks
-and some careful thinking.
+ClinVar es un archivo público de acceso gratuito de informes de las relaciones entre las variaciones y fenotipos humanos, con evidencia de apoyo. De este modo, ClinVar facilita el acceso y la comunicación sobre las relaciones afirmadas entre la variación humana y el estado de salud observado, y la historia de esa interpretación. ClinVar procesa las presentaciones que informan variantes encontradas en muestras de pacientes, afirmaciones hechas con respecto a su importancia clínica, información sobre el remitente y otros datos de respaldo. Los alelos descritos en las presentaciones se asignan a secuencias de referencia y se informan de acuerdo con el estándar HGVS. Luego, ClinVar presenta los datos para usuarios interactivos y para aquellos que desean usar ClinVar en los flujos de trabajo diarios y otras aplicaciones locales. ClinVar trabaja en colaboración con organizaciones interesadas para satisfacer las necesidades de la comunidad de genética médica de la manera más eficiente y efectiva posible. Lea más sobre el uso de ClinVar.
 
-By default, SQLite does not display NULL values in its output. The `.nullvalue`
-command causes SQLite to display the value you specify for NULLs. We will use
-the value `-null-` to make the NULLs easier to see:
+ClinVar admite presentaciones de diferentes niveles de complejidad. La presentación puede ser tan simple como una representación de un alelo y su interpretación (a veces denominada presentación de nivel variante), o tan detallada como proporcionar múltiples tipos de evidencia estructurada de observación (nivel de caso) o experimental sobre el efecto de la variación en fenotipo Un objetivo principal es apoyar la (re) evaluación computacional, tanto de genotipos como de afirmaciones, y permitir la evolución y el desarrollo continuos del conocimiento con respecto a las variaciones y los fenotipos asociados. ClinVar es un socio activo del proyecto ClinGen, que proporciona datos para la evaluación y archiva los resultados de la interpretación por parte de reconocidos paneles de expertos y proveedores de guías de práctica. Archivos de ClinVar y envíos de versiones, lo que significa que cuando los remitentes actualizan sus registros, la versión anterior se retiene para su revisión. Lea más sobre cómo enviar datos a ClinVar.
+
+El nivel de confianza en la precisión de las llamadas de variación y las afirmaciones de importancia clínica depende en gran medida de la evidencia de apoyo, por lo que esta información, cuando esté disponible, se recopila y es visible para los usuarios. Debido a que la disponibilidad de evidencia de respaldo puede variar, particularmente con respecto a los datos retrospectivos agregados de la literatura publicada, el archivo acepta envíos de múltiples grupos y agrega información relacionada, para reflejar de manera transparente tanto el consenso como las afirmaciones conflictivas de importancia clínica. También se asigna un estado de revisión a cualquier aserción, para respaldar la comunicación sobre la confiabilidad de cualquier aserción. Se alienta a los expertos en dominios a solicitar el reconocimiento como panel de expertos.
 
 ~~~
 .nullvalue -null-

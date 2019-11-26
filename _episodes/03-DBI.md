@@ -11,12 +11,14 @@ objectives:
 keypoints:
 - "Casi cualquier gestor de base de datos tiene un interfaz de consulta para ser usado desde cualquier lenguaje de programación."
 - "Para SQLite se usa el paquete sqlite3."
+- "Podemos poner restricciones a la hora de hacer consultas usando WHERE. Esto además puede conjuntarse con otras sentencias como LIKE."
+- "Con las consultas de agregación podemos hacer cálculos para contar el número de registros, entre otros."
+
 ---
 Ayer creamos dos tablas llamadas **SWISSENTRY** y **ACCNUMBERS** en nuetra base de datos e insertamos un par de registros. A lo largo de la tarde de hoy, veremos como automatizar esto.
 
 >## 1. Inserción en una base de datos desde Python
->Para ello vamos a descargar el siguiente [programa]({{ page.root }}/files/uniprotInsert.py) y lo iremos comentando juntos [uniprotInse
->rt.py]({{ page.root }}/files/uniprotInsert_py.html).
+>Para ello vamos a descargar el siguiente [programa]({{ page.root }}/files/uniprotInsert.py) y lo iremos comentando juntos [uniprotInsert.py]({{ page.root }}/files/uniprotInsert_py.html).
 >Para marcar el código con colores, tal y como aparece en el fichero HTML, podéis activar el destacado de sintaxis en vuestro programa.
 >
 > Una vez repasado el programa, descargaremos un [fichero de muestra]({{ page.root }}/files/UniProt-Sample.txt) a nuestro ordenador y lo usaremos junto con el programa recien estudiado para insertar 4 registros.
@@ -24,7 +26,15 @@ Ayer creamos dos tablas llamadas **SWISSENTRY** y **ACCNUMBERS** en nuetra base 
 {: .callout}
 
 
->## 2. Consultas de agregación
+>## 2. Creación de un fichero desde Python, usando información de la base de datos
+>En este caso vamos a hacer el caso contrario, es decir, vamos a crear un programa en Python que automáticamente hará consultas a la base de datos de unos campos determinados. Los resultados de esa consulta se procesarán con Python para crear un fichero. De forma más concreta vamos a seleccionar los identificadores y descripción de cada proteína almacenada en nuestra base de datos y su secuencia
+> y con ello vamos a crear un fichero en formato [FASTA](https://es.wikipedia.org/wiki/Formato_FASTA).
+> El programa lo podéis descargar desde este [link]({{ page.root }}/files/fasta_write.py) y para poder revisarlo juntos, podéis pinchar en el siguiente [link]({{ page.root }}/files/fasta_write_py.html) donde aparece el programa con la sintaxis destacada en colores.
+>
+{: .callout}
+
+
+>## 3. Consultas de agregación
 >Mediante consulta vamos a: 
 >* Recuperar una entrada por su accession number principal. 
 >* Recuperar las entradas que tengan un peso molecular entre 30000 y 90000. 
@@ -34,48 +44,44 @@ Ayer creamos dos tablas llamadas **SWISSENTRY** y **ACCNUMBERS** en nuetra base 
 >* Número de entradas de UniProt insertadas. 
 >* Número de entradas de UniProt con una secuencia de más de 300 aminoácidos. 
 >* Longitud media de las secuencias intertadas. 
->* La desviación estándar del peso molecular. 
+>* Longitud de mayor tamaño de las secuencias intertadas.
+>* Identificador de la proteína con mayor tamaño.
 >* Calcular el número de accession number que hay por entrada. 
 >
 {: .callout}
 
 
-> ## Finding Outliers
+> ## ¿Cómo recuperarias el ID y el tamaño de secuencia de la proteína con accnumber Q7A6N0?
 >
-> Normalized salinity readings are supposed to be between 0.0 and 1.0.
-> Write a query that selects all records from `Survey`
-> with salinity values outside this range.
+> Para resolver esta pregunta tenemos que introducir dos valores en el select, el id y el tamaño de secuencia (length(seq))
 >
 > > ## Solution
 > >
 > > ~~~
-> > SELECT * FROM Survey WHERE quant = 'sal' AND ((reading > 1.0) OR (reading < 0.0));
+> > SELECT id, length(seq) FROM SWISSENTRY WHERE accnumber = 'Q7A6N0';
 > > ~~~
 > > {: .sql}
 > >
-> > |taken     |person    |quant     |reading   |
-> > |----------|----------|----------|----------|
-> > |752       |roe       |sal       |41.6      |
-> > |837       |roe       |sal       |22.5      |
+> > |id                 |length(seq)    |
+> > |-------------------|---------------|
+> > |Q7A6N0_STAAN       |16             |
 > {: .solution}
 {: .challenge}
 
-> ## Matching Patterns
+> ## ¿Cuantas proteínas hay de membrana?
 >
-> Which of these expressions are true?
+> Tenemos que usar la función para contar (COUNT) y además el LIKE.
 >
-> 1. `'a' LIKE 'a'`
-> 2. `'a' LIKE '%a'`
-> 3. `'beta' LIKE '%a'`
-> 4. `'alpha' LIKE 'a%%'`
-> 5. `'alpha' LIKE 'a%p%'`
 >
 > > ## Solution
 > >
-> > 1. True because these are the same character.
-> > 2. True because the wildcard can match _zero_ or more characters.
-> > 3. True because the `%` matches `bet` and the `a` matches the `a`.
-> > 4. True because the first wildcard matches `lpha` and the second wildcard matches zero characters (or vice versa).
-> > 5. True because the first wildcard matches `l` and the second wildcard matches `ha`.
+> > ~~~
+> > select count(*) from SWISSENTRY where description LIKE '%membrane%';
+> > ~~~
+> > {: .sql}
+> >
+> > |count(*)      |
+> > |--------------|
+> > |11            |
 > {: .solution}
 {: .challenge}
