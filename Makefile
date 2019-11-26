@@ -19,7 +19,7 @@ commands :
 
 ## docker-serve     : use docker to build the site
 docker-serve :
-	docker run --rm -it -v ${PWD}:/srv/jekyll -p 127.0.0.1:4000:4000 jekyll/jekyll:${JEKYLL_VERSION} make serve
+	docker run --rm -it -u "$(shell id -u):$(shell id -g)" -v ${PWD}:/srv/jekyll -p 127.0.0.1:4000:4000 jekyll/jekyll:${JEKYLL_VERSION} make serve
 
 ## serve            : run a local server.
 serve : lesson-md
