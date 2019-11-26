@@ -41,20 +41,9 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >
 > ~~~
 > ALTER TABLE miagenda
->    ADD direccion VARCHAR(255),
->    ADD UNIQUE (direccion),
->    ADD UNIQUE (telefono2); 
+>    ADD direccion VARCHAR(255);
 > ~~~
 > {: .sql}
->
->Creamos primero un nuevo campo en la tabla llamado "direccion", y después mediante "ADD UNIQUE (direccion)", lo convertimos en un campo con clave única. También añadimos una clave única al campo ya existente "telefono2", de la misma manera que para la anterior es decir mediante `ADD UNIQUE (telefono2)`.
->Cada una de estas instrucciones incluidas en "ALTER TABLE" irán separadas entre sí por comas.
->Para eliminar una clave unica utilizaremos la instrucción:
-> ~~~
->ALTER TABLE nombre_tabla DROP INDEX nombre_columna;
-> ~~~
-> {: .sql}
->Es decir es otra instruccion dentro de `ALTER TABLE`. Lo de DROP INDEX es porque en realidad una clave única se considera un índice para buscar elementos en la tabla.
 >
 >
 > La clave primaria, o **PRIMARY KEY** es el verdadero identificador de cada registro. Sólo puede haber una columna con clave primaria por tabla, y los registros deben ser también únicos, es decir no pueden estar repetidos ni ser nulos.
@@ -67,18 +56,6 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > ~~~
 > {: .sql}
 >Al crear esta columna debemos ponerle la instrucción **NOT NULL** para que pueda ser una clave primaria. No tendría lógica crear un campo de tanta importancia y permitir que sea **NULL**.
->Si tenemos una tabla ya creada, podemos indicar qué columna será la clave primaria mediante la instrucción:
-> ~~~
->ALTER TABLE prueba1
->ADD PRIMARY KEY (id_prueba1)
-> ~~~
-> {: .sql}
->
->Para eliminar la clave primaria de una tabla utilizaremos la instrucción:
-> ~~~
->ALTER TABLE nombre_tabla DROP PRIMARY KEY
-> ~~~
-> {: .sql}
 >
 >Cómo la clave primaria es única no necesitamos poner el nombre de la columna en la que está para eliminarla.
 >
