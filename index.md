@@ -16,7 +16,7 @@ Las hojas de cálculo son buenas para hacer análisis simples, pero no manejan b
 grandes o complejos. Sin embargo, las bases de datos incluyen herramientas poderosas para búsqueda y análisis, 
 y pueden manejar conjuntos de datos grandes y complejos. 
 
-A lo largo de las siguientes lecciones, se explicará que es un gesto de base de datos, como se insertan datos, como se ocnsultan esos datos y como se puede hacer todo esto de
+A lo largo de las siguientes lecciones, se explicará que es un gesto de base de datos, como se insertan datos, como se consultan esos datos y como se puede hacer todo esto de
 forma automática gracias a la programación en Python.
 
 
