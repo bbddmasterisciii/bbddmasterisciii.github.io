@@ -1,82 +1,63 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="Generator" content="Kate, the KDE Advanced Text Editor" />
-<title>fastawrite.py</title>
-</head>
-<body>
-<pre style='color:#181615;background-color:#ffffff;'>
-<i><span style='color:#898887;'>#!/usr/bin/env python3</span></i>
-<i><span style='color:#898887;'># -*- coding: utf-8 -*-</span></i>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #888888">#!/usr/bin/env python3</span>
+<span style="color: #888888"># -*- coding: utf-8 -*-</span>
 
-<i><span style='color:#898887;'>'''</span></i>
-<i><span style='color:#898887;'>	PrÃ¡cticas de Python DB-API 2.0 (PEP-249) y bases de datos biolÃ³gicas</span></i>
-<i><span style='color:#898887;'>	Script de generaciÃ³n de un fichero con todas las secuencias en formato FASTA</span></i>
-<i><span style='color:#898887;'>'''</span></i>
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
+<span style="color: #DD4422">	Prácticas de Python DB-API 2.0 (PEP-249) y bases de datos biológicas</span>
+<span style="color: #DD4422">	Script de generación de un fichero con todas las secuencias en formato FASTA</span>
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
 
-<span style='color:#ff80e0;'>import</span> sys
-<span style='color:#ff80e0;'>import</span> re
-<span style='color:#ff80e0;'>import</span> psycopg2 <span style='color:#ff80e0;'>as</span> dbi
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">sys</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">re</span>
+<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">sqlite3</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">dbi</span>
 
-<i><span style='color:#898887;'>'''</span></i>
-<i><span style='color:#898887;'>Estas variables globales contienen los parÃ¡metros de conexiÃ³n a la base de datos</span></i>
-<i><span style='color:#898887;'>'''</span></i>
-dbhost<b>=</b><span style='color:#bf0303;'>'localhost'</span>	<i><span style='color:#898887;'># El servidor, en este caso vuestro portÃ¡til</span></i>
-dbname<b>=</b><span style='color:#bf0303;'>'masterdb'</span>	<i><span style='color:#898887;'># El nombre de la base de datos, que tendrÃ©is que cambiarlo</span></i>
-dbuser<b>=</b><span style='color:#bf0303;'>'masteruser'</span>	<i><span style='color:#898887;'># Vuestro nombre de usuario</span></i>
-dbpass<b>=</b><span style='color:#bf0303;'>'masterpass'</span>	<i><span style='color:#898887;'># La contraseÃ±a para vuestro nombre de usuario</span></i>
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
+<span style="color: #DD4422">Estas variables globales contienen los parámetros de conexión a la base de datos</span>
+<span style="color: #DD4422">&#39;&#39;&#39;</span>
+dbname<span style="color: #333333">=</span><span style="background-color: #fff0f0">&#39;uniprot.db&#39;</span>	<span style="color: #888888"># El nombre de la base de datos, que tendríais que cambiarlo</span>
 
-<i><span style='color:#898887;'># ComprobaciÃ³n del nÃºmero de parÃ¡metros de entrada</span></i>
-<b>if</b> <span style='color:#0057ae;'>__name__</span> <b>==</b> <span style='color:#bf0303;'>'__main__'</span>:
-	<b>if</b> <span style='color:#0057ae;'>len</span>(sys.argv)<b>==</b><span style='color:#b08000;'>2</span>:
-		<i><span style='color:#898887;'># Se intenta crear el fichero de salida de los datos</span></i>
-		<i><span style='color:#898887;'># Estamos abriendo el fichero con el encoding 'latin-1'</span></i>
-		<i><span style='color:#898887;'># Para ficheros que contendrÃ¡n acentos, eÃ±es, etc... lo recomendable es el encoding 'utf-8'</span></i>
-		<b>with</b> <span style='color:#0057ae;'>open</span>(sys.argv[<span style='color:#b08000;'>1</span>],<span style='color:#bf0303;'>'w'</span>,encoding<b>=</b><span style='color:#bf0303;'>&quot;latin-1&quot;</span>) <span style='color:#ff80e0;'>as</span> outfile:
-			<i><span style='color:#898887;'># Apertura de la conexiÃ³n con la base de datos</span></i>
-			<b>try</b>:
-				conn <b>=</b> dbi.<b><span style='color:#0095ff;'>connect</span></b>(host<b>=</b>dbhost,database<b>=</b>dbname,user<b>=</b>dbuser,password<b>=</b>dbpass)
-				<i><span style='color:#898887;'># Esto sirve para que cada sentencia se ejecute inmediatamente</span></i>
-				<i><span style='color:#898887;'># pero si se activa, el fichero generado podrÃ­a no ser coherente</span></i>
-				<i><span style='color:#898887;'>#conn.autocommit = True</span></i>
-			<b>except</b> dbi.Error <span style='color:#ff80e0;'>as</span> e:
-				<b>print</b>(<span style='color:#bf0303;'>&quot;Ha habido un problema al conectar a la base de datos: &quot;</span>,e.diag.message_primary,<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
-				<b>raise</b>
-			
-			<i><span style='color:#898887;'># Procesamiento de cada fichero</span></i>
-			<b>with</b> conn:
-				<b>try</b>:
-					<i><span style='color:#898887;'># ObtenciÃ³n de un cursor para enviar operaciones a la base de datos</span></i>
-					<i><span style='color:#898887;'># Tiene que tener nombre para evitar que explote en memoria con la siguiente sentencia</span></i>
-					<b>with</b> conn.cursor(name<b>=</b><span style='color:#bf0303;'>&quot;fastawrite&quot;</span>) <span style='color:#ff80e0;'>as</span> cur:
-						<i><span style='color:#898887;'># Vamos a ejecutar la sentencia</span></i>
-						cur.execute(<span style='color:#bf0303;'>'SELECT accnumber,description,seq FROM SWISSENTRY'</span>)
-						<i><span style='color:#898887;'># Lectura de datos de la base de datos</span></i>
-						<b>for</b> row <b>in</b> cur:
-							<i><span style='color:#898887;'># Y escritura de los mismos en formato FASTA</span></i>
-							<b>print</b>(<span style='color:#bf0303;'>&quot;&gt;{0[0]};{0[1]}&quot;</span>.<span style='color:#0057ae;'>format</span>(row),<span style='color:#0057ae;'>file</span><b>=</b>outfile)
-							sequence <b>=</b> row[<span style='color:#b08000;'>2</span>]
-							<b>while</b> <span style='color:#0057ae;'>len</span>(sequence)<b>&gt;</b><span style='color:#b08000;'>60</span>:
-								<b>print</b>(sequence[<span style='color:#b08000;'>0</span>:<span style='color:#b08000;'>60</span>],<span style='color:#0057ae;'>file</span><b>=</b>outfile)
-								sequence <b>=</b> sequence[<span style='color:#b08000;'>60</span>:]
-							<i><span style='color:#898887;'># El Ãºltimo trozo de la secuencia</span></i>
-							<b>print</b>(sequence,<span style='color:#0057ae;'>file</span><b>=</b>outfile)
-							
-						
-				<b>except</b> dbi.Error <span style='color:#ff80e0;'>as</span> e:
-					<b>print</b>(<span style='color:#bf0303;'>&quot;Error al insertar en la base de datos: &quot;</span>,e.diag.message_primary,<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
-					<b>raise</b>
-				<b>except</b> <b><span style='color:#054d00;'>IOError</span></b> <span style='color:#ff80e0;'>as</span> e:
-					<b>print</b>(<span style='color:#bf0303;'>&quot;Error de escritura de fichero {0}: {1}&quot;</span>.<span style='color:#0057ae;'>format</span>(e.errno, e.strerror),<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
-					<b>raise</b>
-				<b>except</b>:
-					<b>print</b>(<span style='color:#bf0303;'>&quot;Error inesperado: &quot;</span>, sys.exc_info()[<span style='color:#b08000;'>0</span>],<span style='color:#0057ae;'>file</span><b>=</b>sys.stderr)
-					<b>raise</b>
+<span style="color: #888888"># Comprobación del número de parámetros de entrada</span>
+<span style="color: #008800; font-weight: bold">if</span> __name__ <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;__main__&#39;</span>:
+    <span style="color: #008800; font-weight: bold">if</span> <span style="color: #007020">len</span>(sys<span style="color: #333333">.</span>argv)<span style="color: #333333">==</span><span style="color: #0000DD; font-weight: bold">2</span>:
+		<span style="color: #888888"># Apertura de la conexiÃ³n con la base de datos</span>
+        <span style="color: #008800; font-weight: bold">try</span>:
+            <span style="color: #888888">#Conexión a la base de datos</span>
+            conn <span style="color: #333333">=</span> dbi<span style="color: #333333">.</span>connect(dbname)
+        <span style="color: #888888">#Si no podemos conectarnos, imprime el mensaje de error   </span>
+        <span style="color: #008800; font-weight: bold">except</span> dbi<span style="color: #333333">.</span>Error <span style="color: #008800; font-weight: bold">as</span> e:
+            <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Ha habido un problema al conectar a la base de datos: &quot;</span>,e<span style="color: #333333">.</span>diag<span style="color: #333333">.</span>message_primary,<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
+            <span style="color: #008800; font-weight: bold">raise</span>
 		
-	<b>else</b>:
-		<b>raise</b> <b><span style='color:#054d00;'>AssertionError</span></b>(<span style='color:#bf0303;'>&quot;Debes introducir el nombre del fichero de salida.&quot;</span>)
-</pre>
-</body>
-</html>
+		<span style="color: #888888"># Procesamiento de cada fichero</span>
+        <span style="color: #008800; font-weight: bold">with</span> conn:
+            <span style="color: #008800; font-weight: bold">try</span>:
+				<span style="color: #888888"># Obtención de un cursor para enviar operaciones a la base de datos</span>
+				<span style="color: #888888"># Tiene que tener nombre para evitar que explote en memoria con la siguiente sentencia</span>
+                cur <span style="color: #333333">=</span> conn<span style="color: #333333">.</span>cursor()
+                <span style="color: #888888"># Para ficheros que contendrán acentos, eñes, etc... lo recomendable es el encoding &#39;utf-8&#39;        </span>
+                <span style="color: #008800; font-weight: bold">with</span> <span style="color: #007020">open</span>(sys<span style="color: #333333">.</span>argv[<span style="color: #0000DD; font-weight: bold">1</span>], <span style="background-color: #fff0f0">&quot;w&quot;</span>,encoding<span style="color: #333333">=</span><span style="background-color: #fff0f0">&quot;utf-8&quot;</span>) <span style="color: #008800; font-weight: bold">as</span> write_file:
+					<span style="color: #888888"># Vamos a ejecutar la sentencia</span>
+                    cur<span style="color: #333333">.</span>execute(<span style="background-color: #fff0f0">&#39;SELECT accnumber,description,seq FROM SWISSENTRY&#39;</span>)
+					<span style="color: #888888"># Lectura de datos de la base de datos</span>
+                    <span style="color: #008800; font-weight: bold">for</span> row <span style="color: #000000; font-weight: bold">in</span> cur:
+						<span style="color: #888888"># Y escritura de los mismos en formato FASTA (60 aa)</span>
+                        <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;&gt;{0[0]};{0[1]}&quot;</span><span style="color: #333333">.</span>format(row),<span style="color: #007020">file</span><span style="color: #333333">=</span>write_file)
+                        sequence <span style="color: #333333">=</span> row[<span style="color: #0000DD; font-weight: bold">2</span>]
+                        <span style="color: #008800; font-weight: bold">while</span> <span style="color: #007020">len</span>(sequence)<span style="color: #333333">&gt;</span><span style="color: #0000DD; font-weight: bold">60</span>:
+                            <span style="color: #008800; font-weight: bold">print</span>(sequence[<span style="color: #0000DD; font-weight: bold">0</span>:<span style="color: #0000DD; font-weight: bold">60</span>],<span style="color: #007020">file</span><span style="color: #333333">=</span>write_file)
+                            sequence <span style="color: #333333">=</span> sequence[<span style="color: #0000DD; font-weight: bold">60</span>:]
+						<span style="color: #888888"># El último trozo de la secuencia</span>
+                        <span style="color: #008800; font-weight: bold">print</span>(sequence,<span style="color: #007020">file</span><span style="color: #333333">=</span>write_file)
+					
+            <span style="color: #008800; font-weight: bold">except</span> dbi<span style="color: #333333">.</span>Error <span style="color: #008800; font-weight: bold">as</span> e:
+                <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Error al insertar en la base de datos: &quot;</span>,e<span style="color: #333333">.</span>diag<span style="color: #333333">.</span>message_primary,<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
+                <span style="color: #008800; font-weight: bold">raise</span>
+            <span style="color: #008800; font-weight: bold">except</span> <span style="color: #FF0000; font-weight: bold">IOError</span> <span style="color: #008800; font-weight: bold">as</span> e:
+                <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Error de escritura de fichero {0}: {1}&quot;</span><span style="color: #333333">.</span>format(e<span style="color: #333333">.</span>errno, e<span style="color: #333333">.</span>strerror),<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
+                <span style="color: #008800; font-weight: bold">raise</span>
+            <span style="color: #008800; font-weight: bold">except</span>:
+                <span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Error inesperado: &quot;</span>, sys<span style="color: #333333">.</span>exc_info()[<span style="color: #0000DD; font-weight: bold">0</span>],<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
+                <span style="color: #008800; font-weight: bold">raise</span>
+		
+    <span style="color: #008800; font-weight: bold">else</span>:
+        <span style="color: #008800; font-weight: bold">raise</span> <span style="color: #FF0000; font-weight: bold">AssertionError</span>(<span style="background-color: #fff0f0">&quot;Debes introducir el nombre del fichero de salida.&quot;</span>)
+</pre></div>

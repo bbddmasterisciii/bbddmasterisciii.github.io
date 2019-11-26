@@ -15,7 +15,7 @@ keypoints:
 Ayer creamos dos tablas llamadas **SWISSENTRY** y **ACCNUMBERS** en nuetra base de datos e insertamos un par de registros. A lo largo de la tarde de hoy, veremos como automatizar esto.
 
 >## 1. Inserción en una base de datos desde Python
->Para ello vamos a [descargar]({{ page.root }}/files/uniprotInsert.py) el siguiente programa y lo iremos comentando juntos [uniprotInse
+>Para ello vamos a descargar el siguiente [programa]({{ page.root }}/files/uniprotInsert.py) y lo iremos comentando juntos [uniprotInse
 >rt.py]({{ page.root }}/files/uniprotInsert_py.html).
 >Para marcar el código con colores, tal y como aparece en el fichero HTML, podéis activar el destacado de sintaxis en vuestro programa.
 >

@@ -13,7 +13,7 @@
 <span style="color: #DD4422">&#39;&#39;&#39;</span>
 <span style="color: #DD4422">Estas variables globales contienen los parámetros de conexión a la base de datos</span>
 <span style="color: #DD4422">&#39;&#39;&#39;</span>
-dbname<span style="color: #333333">=</span><span style="background-color: #fff0f0">&#39;uniprot.db&#39;</span>	<span style="color: #888888"># El nombre de la base de datos, que tendrÃ©is que cambiarlo</span>
+dbname<span style="color: #333333">=</span><span style="background-color: #fff0f0">&#39;uniprot.db&#39;</span>	<span style="color: #888888"># El nombre de la base de datos, que tendréis que cambiarlo si no habeisd usado el mismo que nosotros</span>
 
 <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">SWParser</span>(<span style="color: #007020">object</span>):
 	<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">__init__</span>(<span style="color: #007020">self</span>,filename):
@@ -28,7 +28,7 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 		<span style="color: #008800; font-weight: bold">return</span> <span style="color: #007020">self</span>
 	
 	<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">__next__</span>(<span style="color: #007020">self</span>):
-		<span style="color: #888888"># InicializaciÃ³n de variables</span>
+		<span style="color: #888888"># Inicialización de variables</span>
 		acc <span style="color: #333333">=</span> []
 		<span style="color: #007020">id</span> <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
 		lastdate <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
@@ -40,7 +40,7 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 			<span style="color: #888888"># Lo primero, quitar el salto de lÃ­nea</span>
 			line <span style="color: #333333">=</span> line<span style="color: #333333">.</span>rstrip(<span style="background-color: #fff0f0">&#39;</span><span style="color: #666666; font-weight: bold; background-color: #fff0f0">\n</span><span style="background-color: #fff0f0">&#39;</span>)
 			
-			<span style="color: #888888"># DetecciÃ³n del final del registro</span>
+			<span style="color: #888888"># Detección del final del registro</span>
 			<span style="color: #008800; font-weight: bold">if</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">&#39;^//&#39;</span>,line) <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
 				<span style="color: #888888"># Cuando se ha terminado de leer un</span>
 				<span style="color: #888888"># registro hay que proceder a guardar</span>
@@ -49,12 +49,12 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 				<span style="color: #008800; font-weight: bold">if</span> description <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;&#39;</span>:
 					description <span style="color: #333333">=</span> <span style="color: #007020">None</span>
 				
-				<span style="color: #888888"># ImpresiÃ³n de comprobaciÃ³n</span>
+				<span style="color: #888888"># Impresión de comprobación</span>
 				<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;ACC: {0} ; ID: {1} ; Last: {2}&quot;</span><span style="color: #333333">.</span>format(acc[<span style="color: #0000DD; font-weight: bold">0</span>],<span style="color: #007020">id</span>,lastdate))
 				
 				<span style="color: #008800; font-weight: bold">return</span> acc,<span style="color: #007020">id</span>,lastdate,description,sequence,molw
 			
-			<span style="color: #888888"># Â¿Estoy leyendo una secuencia?</span>
+			<span style="color: #888888"># ¿Estoy leyendo una secuencia?</span>
 			<span style="color: #008800; font-weight: bold">if</span> readingseq:
 				<span style="color: #888888"># Quito todos los espacios intermedios </span>
 				line <span style="color: #333333">=</span> re<span style="color: #333333">.</span>compile(<span style="background-color: #fff0f0">r&quot;\s+&quot;</span>)<span style="color: #333333">.</span>sub(<span style="background-color: #fff0f0">&#39;&#39;</span>,line)
@@ -81,7 +81,7 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 				
 				<span style="color: #008800; font-weight: bold">if</span> matched:
 					<span style="color: #008800; font-weight: bold">if</span> seqmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># ExtracciÃ³n del peso molecular</span>
+						<span style="color: #888888"># Extracción del peso molecular</span>
 						<span style="color: #888888"># y comienzo de secuencia</span>
 						molw <span style="color: #333333">=</span> seqmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
 						
@@ -90,19 +90,19 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 						<span style="color: #888888"># Identificador</span>
 						<span style="color: #007020">id</span> <span style="color: #333333">=</span> idmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
 					<span style="color: #008800; font-weight: bold">elif</span> dtmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># Fecha de la Ãºltima actualizaciÃ³n</span>
+						<span style="color: #888888"># Fecha de la Ãºltima actualización</span>
 						lastdate <span style="color: #333333">=</span> dtmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
 					<span style="color: #008800; font-weight: bold">elif</span> acmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># Los accnumber, que pueden estar en varias lÃ­neas</span>
+						<span style="color: #888888"># Los accnumber, que pueden estar en varias líneas</span>
 						ac <span style="color: #333333">=</span> acmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
-						<span style="color: #888888"># Elimino los espacios y quito el posible Ãºltimo punto y coma</span>
+						<span style="color: #888888"># Elimino los espacios y quito el posible Último punto y coma</span>
 						ac <span style="color: #333333">=</span> re<span style="color: #333333">.</span>compile(<span style="background-color: #fff0f0">r&quot;\s+&quot;</span>)<span style="color: #333333">.</span>sub(<span style="background-color: #fff0f0">&#39;&#39;</span>,ac)<span style="color: #333333">.</span>rstrip(<span style="background-color: #fff0f0">&#39;;&#39;</span>)
 						
 						<span style="color: #888888"># Rompo por los puntos y coma, y</span>
-						<span style="color: #888888"># aÃ±ado a la lista de accnumber</span>
+						<span style="color: #888888"># añado a la lista de accnumber</span>
 						acc<span style="color: #333333">.</span>extend(ac<span style="color: #333333">.</span>split(<span style="background-color: #fff0f0">&#39;;&#39;</span>))
 					<span style="color: #008800; font-weight: bold">elif</span> dematch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># La descripciÃ³n, que puede estar en varias lÃ­neas</span>
+						<span style="color: #888888"># La descripción, que puede estar en varias líneas</span>
 						<span style="color: #008800; font-weight: bold">if</span> description <span style="color: #333333">!=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>:
 							description <span style="color: #333333">+=</span> <span style="background-color: #fff0f0">&#39;, EC &#39;</span>
 						description <span style="color: #333333">+=</span> dematch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
@@ -114,27 +114,25 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 		<span style="color: #008800; font-weight: bold">raise</span> <span style="color: #FF0000; font-weight: bold">StopIteration</span>
 
 
-<span style="color: #888888"># ComprobaciÃ³n del nÃºmero de parÃ¡metros de entrada</span>
+<span style="color: #888888"># Comprobación del número de parámetros de entrada</span>
 <span style="color: #008800; font-weight: bold">if</span> __name__ <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;__main__&#39;</span>:
 	<span style="color: #008800; font-weight: bold">if</span> <span style="color: #007020">len</span>(sys<span style="color: #333333">.</span>argv)<span style="color: #333333">&gt;</span><span style="color: #0000DD; font-weight: bold">1</span>:
-		<span style="color: #888888"># Apertura de la conexiÃ³n con la base de datos</span>
 		<span style="color: #008800; font-weight: bold">try</span>:
+    		<span style="color: #888888"># Apertura de la conexión con la base de datos</span>
 			conn <span style="color: #333333">=</span> dbi<span style="color: #333333">.</span>connect(dbname)
+			<span style="color: #888888"># Obtención de un cursor para enviar operaciones a la base de datos</span>
+			<span style="color: #888888"># Tiene que tener nombre para evitar que explote en memoria con la siguiente sentencia</span>
 			cur <span style="color: #333333">=</span> conn<span style="color: #333333">.</span>cursor()
-            <span style="color: #888888"># Esto sirve para que cada sentencia se ejecute inmediatamente</span>
-			<span style="color: #888888">#conn.autocommit = True</span>
 		<span style="color: #008800; font-weight: bold">except</span> dbi<span style="color: #333333">.</span>Error <span style="color: #008800; font-weight: bold">as</span> e:
 			<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Ha habido un problema al conectar a la base de datos: &quot;</span>,e<span style="color: #333333">.</span>diag<span style="color: #333333">.</span>message_primary,<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
 			<span style="color: #008800; font-weight: bold">raise</span>
-		
 		<span style="color: #888888"># Procesamiento de cada fichero</span>
 		<span style="color: #008800; font-weight: bold">with</span> conn:
 			<span style="color: #008800; font-weight: bold">for</span> infile <span style="color: #000000; font-weight: bold">in</span> sys<span style="color: #333333">.</span>argv[<span style="color: #0000DD; font-weight: bold">1</span>:]:
 				<span style="color: #008800; font-weight: bold">try</span>:
-					<span style="color: #888888"># ObtenciÃ³n de un cursor para enviar operaciones a la base de datos</span>
 					<span style="color: #008800; font-weight: bold">for</span> acc,<span style="color: #007020">id</span>,lastdate,description,sequence,molw <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">iter</span>(SWParser(infile)):
-							<span style="color: #888888"># PreparaciÃ³n de las operaciones de inserciÃ³n a realizar repetidamente</span>
-							<span style="color: #888888"># (DeberÃ­a hacer un chequeo aquÃ­, para comprobar que funcionan)</span>
+							<span style="color: #888888"># Preparación de las operaciones de inserción a realizar repetidamente</span>
+							<span style="color: #888888"># (Debería hacer un chequeo aquí, para comprobar que funcionan)</span>
 						cur<span style="color: #333333">.</span>execute(<span style="background-color: #fff0f0">&#39;INSERT INTO SWISSENTRY VALUES (?,?,?,?,?,?)&#39;</span>,(acc[<span style="color: #0000DD; font-weight: bold">0</span>],<span style="color: #007020">id</span>,lastdate,description,sequence,molw))
 						<span style="color: #008800; font-weight: bold">for</span> accnumber <span style="color: #000000; font-weight: bold">in</span> acc:
 								cur<span style="color: #333333">.</span>execute(<span style="background-color: #fff0f0">&#39;INSERT INTO ACCNUMBERS(main_accnumber,accnumber) VALUES (?,?)&#39;</span>,(acc[<span style="color: #0000DD; font-weight: bold">0</span>],accnumber))
@@ -150,5 +148,6 @@ dbname<span style="color: #333333">=</span><span style="background-color: #fff0f
 		
 	<span style="color: #008800; font-weight: bold">else</span>:
 		<span style="color: #008800; font-weight: bold">raise</span> <span style="color: #FF0000; font-weight: bold">AssertionError</span>(<span style="background-color: #fff0f0">&quot;Debes introducir al menos un fichero con formato SW.&quot;</span>)
-<br></pre></div>
+        
+</pre></div>
 
