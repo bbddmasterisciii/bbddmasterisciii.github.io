@@ -29,8 +29,8 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > ~~~
 > CREATE TABLE miagenda (
 >      nombre VARCHAR(255) NOT NULL,
->      telefono1 INT NOT NULL UNIQUE,
->      telefono2 INT,
+>      telefono1 INTEGER NOT NULL UNIQUE,
+>      telefono2 INTEGER,
 >      email VARCHAR(255) NOT NULL UNIQUE
 >      );
 > ~~~
@@ -41,20 +41,9 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >
 > ~~~
 > ALTER TABLE miagenda
->    ADD direccion VARCHAR(255),
->    ADD UNIQUE (direccion),
->    ADD UNIQUE (telefono2); 
+>    ADD direccion VARCHAR(255);
 > ~~~
 > {: .sql}
->
->Creamos primero un nuevo campo en la tabla llamado "direccion", y después mediante "ADD UNIQUE (direccion)", lo convertimos en un campo con clave única. También añadimos una clave única al campo ya existente "telefono2", de la misma manera que para la anterior es decir mediante `ADD UNIQUE (telefono2)`.
->Cada una de estas instrucciones incluidas en "ALTER TABLE" irán separadas entre sí por comas.
->Para eliminar una clave unica utilizaremos la instrucción:
-> ~~~
->ALTER TABLE nombre_tabla DROP INDEX nombre_columna;
-> ~~~
-> {: .sql}
->Es decir es otra instruccion dentro de `ALTER TABLE`. Lo de DROP INDEX es porque en realidad una clave única se considera un índice para buscar elementos en la tabla.
 >
 >
 > La clave primaria, o **PRIMARY KEY** es el verdadero identificador de cada registro. Sólo puede haber una columna con clave primaria por tabla, y los registros deben ser también únicos, es decir no pueden estar repetidos ni ser nulos.
@@ -67,18 +56,6 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > ~~~
 > {: .sql}
 >Al crear esta columna debemos ponerle la instrucción **NOT NULL** para que pueda ser una clave primaria. No tendría lógica crear un campo de tanta importancia y permitir que sea **NULL**.
->Si tenemos una tabla ya creada, podemos indicar qué columna será la clave primaria mediante la instrucción:
-> ~~~
->ALTER TABLE prueba1
->ADD PRIMARY KEY (id_prueba1)
-> ~~~
-> {: .sql}
->
->Para eliminar la clave primaria de una tabla utilizaremos la instrucción:
-> ~~~
->ALTER TABLE nombre_tabla DROP PRIMARY KEY
-> ~~~
-> {: .sql}
 >
 >Cómo la clave primaria es única no necesitamos poner el nombre de la columna en la que está para eliminarla.
 >
@@ -140,7 +117,6 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >Ahora insertamos datos en la tabla libros:
 > ~~~
 > INSERT INTO libros VALUES(1, "Paradysso", "Libro de ciencia ficción sobre marcianos", 1);
->
 > ~~~
 > {: .sql} 
 > He guardado un nuevo libro, escrito por Juan Morientes, pero **ERROR!**, el escritor es Paco Cepeda !!!!!. Como hago para cambiarlo en la tabla libros ¿?
@@ -212,7 +188,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > {: .sql}
 >
 > 
-> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](http://www.uniprot.org/uniprot/?query=*&random=yes) (una vez en la página, pinchad en Format->Text).
+> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](https://www.uniprot.org/uniprot/?query=reviewed:yes&random=yes) (una vez en la página, pinchad en Format->Text).
 >
 > Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer. No olvideis que son dos tablas y en ambas hay que insertar los dos registros.
 >
