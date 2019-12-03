@@ -6,14 +6,14 @@ exercises: 30
 questions:
 - "Como entrar al gestor de bases de datos?"
 objectives:
-- "Familiarizarse con la sehll de SQLite."
+- "Familiarizarse con la shell de SQLite."
 - "Crear tablas, insertar datos, recuperar registros."
 - "Guardar los resultados en un fichero."
 keypoints:
 - "Una base de datos relacional almacena información en tablas, cada una de las cuales tiene un conjunto fijo de columnas y un número variable de registros"
 - "Un gestor de base de datos es un programa que manipula la información almacenada en una base de datos"
 - "Escribimos consultas en un lenguaje especializado llamado SQL para extraer información de las bases de datos"
-- "Usa SELECT ... FROM ... para obtener valores de una tabla de base de datos"
+- "Usa `SELECT ... FROM ...` para obtener valores de una tabla de base de datos"
 - "SQL no distingue entre mayúsculas y minúsculas (pero los datos distinguen entre mayúsculas y minúsculas)"
 ---
 
@@ -24,7 +24,7 @@ Cada tabla tiene columnas (también conocidas como [campos]({% link reference.md
 y filas (también conocidas como [registros]({% link reference.md %}#record)) que contienen los datos.
 
 Cuando estamos usando una hoja de cálculo,
-Ponemos fórmulas en las celdas para calcular nuevos valores basados ​​en los antiguos.
+ponemos fórmulas en las celdas para calcular nuevos valores basados ​​en los antiguos.
 Cuando estamos usando una base de datos,
 enviamos comandos
 (generalmente llamado [consultas]({% link reference.md %}#query))
@@ -39,16 +39,18 @@ que significa "lenguaje de consulta estructurado".
 SQL proporciona cientos de formas diferentes de analizar y recombinar datos.
 Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de lo que hacen los científicos.
 
-Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}/files/BBDD-Master2019_2020-0.pdf) para que podáis verla cuando queráis.
+Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}{% link files/BBDD-Master2019_2020-0.pdf %}){:target="_blank"} para que podáis verla cuando queráis.
 > ## 0. Gestores de bases de datos
 >
 > Existen muchos gestores de bases de datos (Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access y SQLite) y todos entienden el lenguaje SQL, 
 > pero cada uno almacena los datos de una manera diferente, por lo que una base de datos creada con uno no puede ser utilizada
-> directamente por otro. Sin embargo, cada gestor de base de datos puede importar y exportar datos en una variedad de
-> formatos como .csv, SQL, por lo que es posible mover información de uno a otro.
+> directamente por otro. Sin embargo, casi cada gestor de base de datos puede importar y exportar datos en alguno de los
+> formatos comunes como .csv o SQL, por lo que es posible mover información de uno a otro sin necesidad de escribir un programa especial.
 {: .callout}
 
-> ## 1. Entrar y salir de SQLite
+> ## 1. Entrar y salir de la shell SQLite
+>
+> SQLite es un gestor de bases de datos embebido, que no necesita de un servidor separado para manejar sus instancias de bases de datos.
 >
 > Para usar los comandos SQLite de forma *interactiva*, necesitamos
 > entrar en la consola SQLite. Para ello, lo más recomendable es que os creeis una carpeta para almacenar los datos.
@@ -61,22 +63,22 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > ~~~
 > {: .bash}
 >
->El comando para acceder al gesto SQLite es `sqlite3`, al no incluir nada más en el comando,
-> abrirá una base de datos temporal y vacía.
+>El comando para acceder al gesto SQLite es `sqlite3`. Al no incluir nada más en el comando,
+> creará en memoria una base de datos temporal y vacía.
 >
-> Para salir de SQLite, escribe `.exit` o` .quit`. Para algunos
-> terminales, `Ctrl-D` también puede funcionar. Para ver el conjunto de comandos que pueden usarse,
+> Para salir de la shell de SQLite, escribe `.exit` o` .quit`. Para algunos
+> terminales, la combinación de teclas `Ctrl-D` también puede funcionar. Para ver el conjunto de comandos que pueden usarse,
 > escribe `.help`.
 >Ya sabemos entrar, salir y ver la ayuda. Así que ahora vamos a hacer algo más interesante.
 >Vamos a usar una base de datos de prueba para que podáis ver como se estructura la información.
->En primer lugar, teneis que descargar el fichero [survey.db]({{ page.root }}/files/survey.db).
+>En primer lugar, teneis que descargar el fichero [survey.db]({{ page.root }}{% link files/survey.db %}){:target="_blank"}.
  {: .callout}
 
 
 > ## 1.1 Primeros comandos en SQL
 >
 > Antes de empezar, tenemos que copiar/mover el fichero recién descargado a nuestro directorio.
-> Una vez lo tengais (por ejemplo $HOME/SQL/), comprobadlo desde la terminal
+> Una vez lo tengais (por ejemplo `$HOME/SQL/`), comprobadlo desde la terminal
 >
 > ~~~
 > $ cd $HOME/SQL/
@@ -101,7 +103,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > ~~~
 > {: .output}
 >
-> De esta forma estamos indicando al gestor de SQLite, que carge la base de datos contenida en el fichero `survey.db`.
+> De esta forma estamos indicando al gestor de SQLite, que cargue la base de datos contenida en el fichero `survey.db`.
 >
 > Como dijimos anteriormente, podeis obtener el conjunto de comandos existentes escribiendo `.help` en la shell de SQLite.
 >
@@ -221,7 +223,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 >Ahora, volviendo a nuestra consulta SQL anterior, es importante entender que
 >las filas y columnas en una tabla de base de datos no se almacenan en ningún orden en particular.
->Siempre se * mostrarán * en algún orden, pero podemos controlar eso de varias maneras.
+>Siempre se **mostrarán** en algún orden, pero podemos controlar eso de varias maneras.
 >Por ejemplo, podríamos intercambiar las columnas en la salida escribiendo nuestra consulta como:
 >
 >~~~
