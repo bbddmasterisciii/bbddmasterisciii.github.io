@@ -265,4 +265,12 @@ CREATE TABLE IF NOT EXISTS variant_phenotypes (
 > ~~~
 > {: .python}
 >
+> El programa se ejecutaría de la siguiente manera, dando como resultado un fichero de base de datos SQLite con todo el contenido extraído de ClinVar, listo para ser consultado programáticamente o mediante *shell* de SQLite:
+>
+> ~~~bash
+> python3 clinvar_parser.py clinvar.db variant_summary.txt.gz
+> sqlite3 clinvar.db 'SELECT COUNT(*) FROM variant'
+> ~~~
+> {: .bash}
+>
  {: .callout}
