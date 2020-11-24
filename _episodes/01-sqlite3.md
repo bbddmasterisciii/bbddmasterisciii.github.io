@@ -4,7 +4,7 @@ teaching: 60
 exercises: 30
 
 questions:
-- "Como entrar al gestor de bases de datos?"
+- "¿Cómo puedo entrar al gestor de bases de datos?"
 objectives:
 - "Familiarizarse con la shell de SQLite."
 - "Crear tablas, insertar datos, recuperar registros."
@@ -12,9 +12,9 @@ objectives:
 keypoints:
 - "Una base de datos relacional almacena información en tablas, cada una de las cuales tiene un conjunto fijo de columnas y un número variable de registros"
 - "Un gestor de base de datos es un programa que manipula la información almacenada en una base de datos"
-- "Escribimos consultas en un lenguaje especializado llamado SQL para extraer información de las bases de datos"
+- "Las consultas se expresan en un lenguaje llamado SQL para extraer información de las bases de datos"
 - "Usa `SELECT ... FROM ...` para obtener valores de una tabla de base de datos"
-- "SQL no distingue entre mayúsculas y minúsculas (pero los datos distinguen entre mayúsculas y minúsculas)"
+- "SQL no distingue entre mayúsculas y minúsculas para los identificadores, pero sí para los datos"
 ---
 
 Una [base de datos relacional]({% link reference.md %}#relational-database)
@@ -24,28 +24,28 @@ Cada tabla tiene columnas (también conocidas como [campos]({% link reference.md
 y filas (también conocidas como [registros]({% link reference.md %}#record)) que contienen los datos.
 
 Cuando estamos usando una hoja de cálculo,
-ponemos fórmulas en las celdas para calcular nuevos valores basados ​​en los antiguos.
+ponemos fórmulas en las celdas para calcular nuevos valores basados ​​en los de otras celdas.
 Cuando estamos usando una base de datos,
 enviamos comandos
-(generalmente llamado [consultas]({% link reference.md %}#query))
+(generalmente llamados [consultas]({% link reference.md %}#query))
 a un [administrador de base de datos]({% link reference.md %}#database-manager):
-Un programa que manipula la base de datos para nosotros.
+un programa que manipula la base de datos para nosotros.
 El administrador de la base de datos realiza cualquier búsqueda y cálculo que especifique la consulta,
 devolver los resultados en forma de tabla
-que luego podemos usar como punto de partida para futuras consultas.
+que luego podamos usar como punto de partida para futuras consultas.
 
-Las consultas se escriben en un lenguaje llamado [SQL]({% link reference.md %}#sql),
-que significa "lenguaje de consulta estructurado".
+Las consultas se expresan en un lenguaje llamado [SQL]({% link reference.md %}#sql),
+que significa "lenguaje de consultas estructurado".
 SQL proporciona cientos de formas diferentes de analizar y recombinar datos.
-Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de lo que hacen los científicos.
+Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de lo necesario para el trabajo científico.
 
-Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}{% link files/BBDD-Master2019_2020-0.pdf %}){:target="_blank"} para que podáis verla cuando queráis.
+Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}{% link files/BBDD-Master2020_2021-0.pdf %}){:target="_blank"} para que podáis verla cuando queráis.
 > ## 0. Gestores de bases de datos
 >
 > Existen muchos gestores de bases de datos (Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access y SQLite) y todos entienden el lenguaje SQL, 
 > pero cada uno almacena los datos de una manera diferente, por lo que una base de datos creada con uno no puede ser utilizada
 > directamente por otro. Sin embargo, casi cada gestor de base de datos puede importar y exportar datos en alguno de los
-> formatos comunes como .csv o SQL, por lo que es posible mover información de uno a otro sin necesidad de escribir un programa especial.
+> formatos comunes como `.csv` o sentencias SQL, por lo que es posible mover información de uno a otro sin necesidad de escribir un programa especial.
 {: .callout}
 
 > ## 1. Entrar y salir de la shell SQLite
@@ -54,7 +54,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 > Para usar los comandos SQLite de forma *interactiva*, necesitamos
 > entrar en la consola SQLite. Para ello, lo más recomendable es que os creeis una carpeta para almacenar los datos.
-> Asi que abre una terminal y ejecuta. 
+> Así que abre una terminal y ejecuta. 
 >
 > ~~~
 > $ mkdir $HOME/SQL/
