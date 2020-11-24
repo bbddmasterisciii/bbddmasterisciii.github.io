@@ -24,9 +24,9 @@ forma automática gracias a la programación en un lenguaje como Python.
 
 
 >
-> ## Prerequisitos
+> ## Prerrequisitos
 >
-> * Estas practicas requieren de una shell de Unix, de [SQLite3](http://www.sqlite.org/) y de [Python 3.6](https://www.python.org/downloads/) o superior.
+> * Estas prácticas requieren de una shell de Unix, de [SQLite3](http://www.sqlite.org/) y de [Python 3.6](https://www.python.org/downloads/) o superior.
 >
 {: .prereq}
 
