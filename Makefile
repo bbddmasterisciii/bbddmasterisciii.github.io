@@ -3,6 +3,7 @@
 
 # Settings
 MAKEFILES=Makefile $(wildcard *.mk)
+PRJDIR=$(dir $(realpath $(firstword $(MAKEFILES))))
 JEKYLL=jekyll
 JEKYLL_DOCKER_IMG=jekyll/jekyll
 #JEKYLL_DOCKER_IMG=jekyll/builder
@@ -21,8 +22,13 @@ commands :
 
 ## docker-serve     : use docker to build the site
 docker-serve :
-	-docker run --rm -it -v ${PWD}:/srv/jekyll -p 127.0.0.1:4000:4000 ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} make serve
-	docker run --rm -it -v ${PWD}:/srv/jekyll ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} chown -R $(shell id -u):$(shell id -g) /srv/jekyll
+	-docker run --rm -it -v ${PRJDIR}:/srv/jekyll -e TZ=Europe/Madrid -p 127.0.0.1:4000:4000 ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} make serve
+	docker run --rm -it -v ${PRJDIR}:/srv/jekyll -e TZ=Europe/Madrid ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} chown -R $(shell id -u):$(shell id -g) /srv/jekyll
+
+## docker-serve     : use docker to build the site
+docker-site :
+	-docker run --rm -it -v ${PRJDIR}:/srv/jekyll -e TZ=Europe/Madrid ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} make site
+	docker run --rm -it -v ${PRJDIR}:/srv/jekyll -e TZ=Europe/Madrid ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} chown -R $(shell id -u):$(shell id -g) /srv/jekyll
 
 ## serve            : run a local server.
 serve : lesson-md
