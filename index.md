@@ -8,8 +8,11 @@ Una base de datos biológica es un almacén de datos para información derivada 
 Y una base de datos bioinformática es un almacén de datos para información derivada de datos biológicos y de programas bioinformáticos. 
 A nivel más técnico, las bases de datos biológicas y bioinformáticas están disponibles generalmente como un conjunto de ficheros planos, cuyo tamaño suele ser enorme.
 
-Además de los archivos de texto,  existen otras formas de almacenamiento muy comunes en nuestro campo, 
-hojas de cálculo (generalmente muy mala idea, como explica  [el siguiente artículo](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1044-7){:target="_blank"}) y las bases de datos relacionales. 
+Además de los archivos de texto, existen otras formas de almacenamiento muy comunes en nuestro campo, 
+hojas de cálculo (generalmente muy mala idea, como explica
+[el siguiente artículo](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1044-7){:target="_blank"} y da ejemplo
+[la siguiente noticia](https://www.bbc.com/news/technology-54423988){:target="_blank"})
+y las bases de datos relacionales. 
 Los archivos de texto son más fáciles de crear y funcionan bien con el control de versiones, 
 pero entonces tendríamos que construir herramientas de búsqueda y análisis nosotros mismos. 
 Las hojas de cálculo son buenas para hacer análisis simples, pero no manejan bien conjuntos de datos 
