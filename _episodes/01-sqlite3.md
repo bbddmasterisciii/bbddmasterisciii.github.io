@@ -97,7 +97,7 @@ formatos comunes como `.csv` o sentencias SQL, por lo que es posible mover conte
 > ~~~
 > {: .bash}
 > ~~~
-> SQLite version 3.8.8 2015-01-16 12:08:06
+> SQLite version 3.31.1 2020-01-27 19:55:54
 > Enter ".help" for usage hints.
 > sqlite>
 > ~~~
