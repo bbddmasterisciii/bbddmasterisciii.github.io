@@ -15,8 +15,12 @@ Para instalar SQLite en sistemas como Debian/Ubuntu, debes ejecutar el comando
 ```
 sudo apt-get install sqlite3
 ```
-![image info](./assets/img/sqlite3.png){width=250px}
 
+
+![image info](./assets/img/sqlite3.png){:height="50%" width="50%"}
+
+
+Cómo podeis comprobar en Ubuntu 20.04 la versión que se instala es la 3.31.1, y lo hace dentro de la carpeta /usr/bin/
 
 En sistemas como Red Hat/CentOS, debes usar
 
