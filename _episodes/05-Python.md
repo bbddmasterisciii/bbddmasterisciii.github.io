@@ -14,7 +14,7 @@ keypoints:
 ---
 
 
-> ## 1. Creación de un script de python para insertar datos de Clinvar
+> ## 1. Creación de un script de python para insertar datos de ClinVar
 > Dentro del código Python, lo primero que se hará es ejecutar todas estas sentencias SQL, existan o no las tablas. Por ello se ha usado la variante `IF NOT EXISTS`:
 >
 > ~~~python
@@ -36,7 +36,7 @@ keypoints:
 > ~~~
 > {: .python}
 >
-> Para leer el fichero tabular comprimido es abrirlo con la librería `gzip`:
+> Para leer el fichero tabular comprimido es abrirlo con la librería [gzip](https://docs.python.org/3/library/gzip.html){:target="_blank"}:
 >
 > ~~~python
 > with gzip.open(clinvar_file,"rt",encoding="utf-8") as cf:
