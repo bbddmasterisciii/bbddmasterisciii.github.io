@@ -1,9 +1,9 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 '''
-	PrÃ¡cticas de Python DB-API 2.0 (PEP-249) y bases de datos biolÃ³gicas
-	Script de inserciÃ³n de entradas en formato SWISSPROT en la base de datos
+	Práticas de Python DB-API 2.0 (PEP-249) y bases de datos biológicas
+	Script de inserción de entradas en formato SWISSPROT en la base de datos
 '''
 
 import sys

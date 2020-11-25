@@ -1,9 +1,9 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3.8
 # -*- coding: utf-8 -*-
 
 '''
-	PrÃ¡cticas de Python DB-API 2.0 (PEP-249) y bases de datos biolÃ³gicas
-	Script de generaciÃ³n de un fichero con todas las secuencias en formato FASTA
+	Práticas de Python DB-API 2.0 (PEP-249) y bases de datos biológicas
+	Script de generación de un fichero con todas las secuencias en formato FASTA
 '''
 
 import sys
