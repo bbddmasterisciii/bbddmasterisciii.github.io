@@ -7,9 +7,9 @@ questions:
 objectives:
 - "Conocer el fundamento de la programación relacionada con SQL desde Python"
 - "Leer ficheros de nuestro ordenador e insertar la información relevante en una base de datos relacional"
-- "Consultar desde Python una base de datos y extraer determinados campos"
+- "Almacenar datos desde Python en una base de datos"
 keypoints:
-- "Casi cualquier gestor de base de datos tiene un interfaz de consulta para ser usado desde cualquier lenguaje de programación"
+- "Casi cualquier gestor de base de datos tiene un interfaz de carga para ser usado desde cualquier lenguaje de programación"
 - "Para SQLite se usa en Python el paquete `sqlite3`"
 ---
 
