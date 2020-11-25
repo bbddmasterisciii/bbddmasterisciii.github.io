@@ -4,7 +4,7 @@ title: Setup
 ---
 # Software
 Para este curso, principalmente necesitarás una terminal con shell de Unix,
-[SQLite3](http://www.sqlite.org/){:target="_blank"} y [Python 3.6](https://www.python.org/downloads/){:target="_blank"} o superior.
+[SQLite3](http://www.sqlite.org/){:target="_blank"} y [Python 3.8.5](https://www.python.org/downloads/){:target="_blank"} o superior.
 
 Si estás trabajando en una máquina Linux, como Ubuntu, lo más seguro es que ya tengas SQLite instalado.
 Para comprobarlo, desde una terminal usa el comando `which sqlite3` o el comando `type -a sqlite3` para ver
