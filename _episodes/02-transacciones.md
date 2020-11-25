@@ -16,7 +16,8 @@ keypoints:
 - "Las opciones UPDATE/DELETE ON CASCADE permite mantener una integridad de datos"
 ---
 
-A lo largo del dia de hoy, trabajaremos con datos biológicos, de la base de datos de proteinas [Uniprot](http://www.uniprot.org/). De esta base de datos recopilaremos un par de entradas y las insertaremos en la base de datos.
+A lo largo del día de hoy, trabajaremos con datos biológicos, de la base de datos de proteínas [Uniprot](https://www.uniprot.org/){:target="_blank"}.
+De esta base de datos recopilaremos un par de entradas y las insertaremos en la base de datos.
 Con estos datos de prueba, introduciremos la importancia de la creación de las tablas con claves primarias, únicas y con referencias.
 Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actualización se hace de forma muy sencilla. Si esto no es así, cada actualización, puede ser una pesadilla.
 
@@ -26,7 +27,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >Puede haber varias claves únicas en una tabla.
 >
 >La clave única la podemos marcar al crear la tabla, por ejemplo:
-> ~~~
+> ~~~sql
 > CREATE TABLE miagenda (
 >      nombre VARCHAR(255) NOT NULL,
 >      telefono1 INTEGER NOT NULL UNIQUE,
@@ -39,7 +40,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >Vemos en este ejemplo cómo al crear la tabla "miagenda" los campos "telefono1" y "email" les hemos asignado una clave única mediante la palabra reservada "UNIQUE". Les hemos asignado también la restricción `NOT NULL`, aunque no es obligatorio, es conveniente hacerlo así, de otra manera en el campo sólo se permitiría un registro con valor nulo (ya que otro registro nulo se consideraría repetido).
 >En una tabla ya creada, podemos añadir un registro único a un campo ya existente, o que creamos más tarde, indicandolo en la instrucción `ALTER TABLE` de la siguiente manera:
 >
-> ~~~
+> ~~~sql
 > ALTER TABLE miagenda
 >    ADD direccion VARCHAR(255);
 > ~~~
@@ -51,7 +52,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >
 >Normalmente se crea una columna especial para incluir la clave primaria, que en la mayoría de las tablas llaman "id" o "id_nombretabla". Los valores de los registros suelen ser números enteros que identifican a cada uno de los registros que se crean en la tabla.
 >Como habeis visto arriba, lo normal es crear las columnas de la tabla, y posteriormente indicamos mediante la instrucción `PRIMARY KEY` la columna que debe ser la clave primaria. 
-> ~~~
+> ~~~sql
 >PRIMARY KEY (accnumber),
 > ~~~
 > {: .sql}
@@ -65,7 +66,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >La clave externa crea una relación entre tablas, de forma que la columna a la que se le aplica se relaciona con la columna de la clave primaria de otra tabla. Por lo tanto para crear una clave externa necesitamos tener otra tabla con una clave primaria.
 >Se crea una relación en la que en la que podemos obtener datos de la otra tabla que estén relacionados con la tabla actual. Por ejemplo si tenemos dos tablas, una para "autores" y otra para "libros", poniendo en la tabla "libros" una referencia externa a la tabla "autores" relacionamos a cada libro con su autor.
 >Podemos crear una clave externa al crear la tabla, por ejemplo, suponemos que tenemos una base de datos "mislibros" y ahi crearemos dos tablas: "autores" y "libros". 
-> ~~~
+> ~~~sql
 > CREATE TABLE autores(
 >    id_autor INTEGER PRIMARY KEY AUTOINCREMENT, 
 >    nombre text NOT NULL,
@@ -75,7 +76,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > {: .sql}
 > Hemos ya creado la tabla "autores" con una columna con la clave primaria llamada "id_autor". Creamos ahora la tabla "libros" con sus claves:
 >
-> ~~~
+> ~~~sql
 >CREATE TABLE libros (
 >   id_libros INTEGER PRIMARY KEY AUTOINCREMENT, 
 >   titulo VARCHAR(255),
@@ -88,7 +89,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > {: .sql} 
 >   
 >Nos fijamos en la última línea que es la que crea la clave externa, su estructura es la siguiente:
-> ~~~
+> ~~~sql
 >FORGEIN KEY (col_ref) REFERENCES otra_tabla (col_claveprimaria)
 > ~~~
 > {: .sql}
@@ -96,9 +97,9 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >Para ver el esquema más facilmente, incluimos una imagen:
 >![SQLite Schema](../fig/sqlite-schema1.png)
 >
->Vamos a ver como es el funcionamiento, para ello insertaremos unos datos:
+>Vamos a ver cómo es el funcionamiento. Para ello insertaremos unos datos:
 >
-> ~~~
+> ~~~sql
 >INSERT INTO autores VALUES( 1,"Juan Morientes","Colombiano");
 >INSERT INTO autores (nombre, nacionalidad) VALUES("Paco Cepeda","Argentino");
 >
@@ -113,15 +114,15 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >2           Paco Cepeda     Argentino   
 >```
 >
->Fijaos que en el segundo `INSERT` no estamos incluyendo el id, pero como es un campo con AUTOINCREMENT, para cada registro, el id se suma solo.
->Ahora insertamos datos en la tabla libros:
-> ~~~
+>Fijaos que en el segundo `INSERT` no estamos incluyendo el id, pero como es un campo con `AUTOINCREMENT`, para cada registro, el id aumenta solo.
+>Ahora insertamos datos en la tabla `libros`:
+> ~~~sql
 > INSERT INTO libros VALUES(1, "Paradysso", "Libro de ciencia ficción sobre marcianos", 1);
 > ~~~
 > {: .sql} 
-> He guardado un nuevo libro, escrito por Juan Morientes, pero **ERROR!**, el escritor es Paco Cepeda !!!!!. Como hago para cambiarlo en la tabla libros ¿?
+> He guardado un nuevo libro, escrito por Juan Morientes, pero **ERROR!**, ¡¡¡¡¡ el escritor es Paco Cepeda !!!!! ¿Cómo hago para cambiarlo en la tabla `libros`?
 >
-> ~~~
+> ~~~sql
 > sqlite> SELECT * from libros;
 > ~~~
 > {: .sql} 
@@ -130,7 +131,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >----------  ----------  ----------------------------------------  ----------
 >1           Paradysso   Libro de ciencia ficción sobre marcianos  1         
 >```
-> ~~~
+> ~~~sql
 >UPDATE libros SET ref_autor=2 where id_libros=1;
 >sqlite> SELECT * from libros;
 > ~~~
@@ -140,16 +141,17 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >----------  ----------  ----------------------------------------  ----------
 >1           Paradysso   Libro de ciencia ficción sobre marcianos  2         
 >```
-> En este caso sólo tenemos una tabla que depende de autores, pero si tuvieramos docenas, este cambio sería automatico.
-> Como en nuestra relación externa incluimos "ON DELETE CASCADE ON UPDATE CASCADE", le decimos que los cambiso en una tabla se propaguen por las restantes que las referencian
-> y si ademas se borra un registro, que se borre en todas las tablas dependendientes, de esta forma si borramos al autor 2 de la tabla autores, se borraran todos sus libros de la tabla libros:
-> ~~~
+> En este caso solo tenemos una tabla que depende de `autores`, pero si tuviéramos docenas, este cambio sería automático.
+Como en nuestra relación externa incluimos "ON DELETE CASCADE ON UPDATE CASCADE", le decimos que los cambios en una tabla se propaguen por las restantes que las referencian.
+Y si ademas se borra un registro, que se borre en todas las tablas dependientes.
+De esta forma, si borramos al autor 2 de la tabla `autores`, se borrarán todos sus libros de la tabla `libros`:
+> ~~~sql
 > DELETE from AUTORES where id_autor=2;
 > SELECT * FROM libros;
 > ~~~
 > {: .sql} 
-> En el caso de que no se haya borrado y por lo tanto siga exisistiendo el libro, comprobad que el PRAGMA está activado y probad de nuevo:
-> ~~~
+> En el caso de que no se haya borrado, y por lo tanto, siga existiendo el libro, comprobad que el `PRAGMA foreign_keys` está activado y probad de nuevo:
+> ~~~sql
 > INSERT INTO autores VALUES(2, "Paco Cepeda","Argentino");
 > PRAGMA foreign_keys = ON;
 > DELETE from AUTORES where id_autor=2;
@@ -160,12 +162,13 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 
 
 > ## 3. Ejemplo biológico.
-> Descargad el fichero [initial.sql]({{ page.root }}/files/initial.sql), copiadlo
-> a vuestra carpeta de trabajo y abrirlo con un editor de texto. Vamos a repasar cada una de las sentencias que ahí aparecen, haciendo énfasis en las **claves primarias**, los **registros únicos** y las **referencias externas**:
+> Descargad el fichero [initial.sql]({{ page.root }}/files/initial.sql){:target="_blank"}, copiadlo
+> a vuestra carpeta de trabajo y abrirlo con un editor de texto. Vamos a repasar cada una de las
+sentencias que ahí aparecen, haciendo énfasis en las **claves primarias**, los **registros únicos** y las **referencias externas**:
 >
 >
 >
-> ~~~
+> ~~~sql
 > CREATE TABLE SWISSENTRY (
 >         accnumber VARCHAR(10) NOT NULL,
 >         id VARCHAR(25) NOT NULL,
@@ -188,7 +191,10 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 > {: .sql}
 >
 > 
-> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán del abrir dos veces el siguiente link de  [Uniprot](https://www.uniprot.org/uniprot/?query=reviewed:yes&random=yes) (una vez en la página, pinchad en Format->Text).
+> Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias
+`CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán
+del abrir dos veces el siguiente link de
+[Uniprot](https://www.uniprot.org/uniprot/?query=reviewed:yes&random=yes){:target="_blank"} (una vez en la página, pinchad en `Format->Text`).
 >
 > Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer. No olvideis que son dos tablas y en ambas hay que insertar los dos registros.
 >
