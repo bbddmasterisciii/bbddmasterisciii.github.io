@@ -42,10 +42,10 @@ Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de
 Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}{% link files/BBDD-Master2020_2021-0.pdf %}){:target="_blank"} para que podáis verla cuando queráis.
 > ## 0. Gestores de bases de datos
 >
-> Existen muchos gestores de bases de datos (Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access y SQLite) y todos entienden el lenguaje SQL, 
-> pero cada uno almacena los datos de una manera diferente, por lo que una base de datos creada con uno no puede ser utilizada
-> directamente por otro. Sin embargo, casi cada gestor de base de datos puede importar y exportar datos en alguno de los
-> formatos comunes como `.csv` o sentencias SQL, por lo que es posible mover información de uno a otro sin necesidad de escribir un programa especial.
+> Existen muchos gestores de bases de datos (Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access y SQLite) y todos entienden dialectos del lenguaje SQL, 
+pero cada uno almacena y gestiona los datos de una manera diferente, por lo que una base de datos creada con uno no puede ser utilizada
+directamente por otro. Sin embargo, casi cada gestor de base de datos puede importar y exportar datos en alguno de los
+formatos comunes como `.csv` o sentencias SQL, por lo que es posible mover contenidos de uno a otro sin necesidad de escribir un programa especial.
 {: .callout}
 
 > ## 1. Entrar y salir de la shell SQLite
@@ -56,7 +56,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > entrar en la consola SQLite. Para ello, lo más recomendable es que os creeis una carpeta para almacenar los datos.
 > Así que abre una terminal y ejecuta. 
 >
-> ~~~
+> ~~~bash
 > $ mkdir $HOME/SQL/
 > $ cd $HOME/SQL/
 > $ sqlite3
@@ -66,7 +66,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >El comando para acceder al gesto SQLite es `sqlite3`. Al no incluir nada más en el comando,
 > creará en memoria una base de datos temporal y vacía.
 >
-> Para salir de la shell de SQLite, escribe `.exit` o` .quit`. Para algunos
+> Para salir de la shell de SQLite, escribe `.exit` o `.quit`. Para algunos
 > terminales, la combinación de teclas `Ctrl-D` también puede funcionar. Para ver el conjunto de comandos que pueden usarse,
 > escribe `.help`.
 >Ya sabemos entrar, salir y ver la ayuda. Así que ahora vamos a hacer algo más interesante.
@@ -80,7 +80,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > Antes de empezar, tenemos que copiar/mover el fichero recién descargado a nuestro directorio.
 > Una vez lo tengais (por ejemplo `$HOME/SQL/`), comprobadlo desde la terminal
 >
-> ~~~
+> ~~~bash
 > $ cd $HOME/SQL/
 > $ ls | grep survey.db
 > ~~~
@@ -92,7 +92,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 > Si has obtenido ese mismo resultado, entonces ejecuta:
 >
-> ~~~
+> ~~~bash
 > $ sqlite3 survey.db
 > ~~~
 > {: .bash}
@@ -126,7 +126,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > sqlite> .schema
 > ~~~
 > {: .sql}
-> ~~~
+> ~~~sql
 > CREATE TABLE Person (id text, personal text, family text);
 > CREATE TABLE Site (name text, lat real, long real);
 > CREATE TABLE Survey (taken integer, person text, quant text, reading real);
@@ -139,7 +139,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > * **personal** con tipo _text_
 > * **family** con tipo _text_
 > 
-> Nota: Los tipos de datos disponibles varían según el gestor de la base de datos; Para SQLite puedes consultarlos [aquí](https://www.sqlite.org/datatype3.html).
+> Nota: Los tipos de datos disponibles varían según el gestor de la base de datos; Para SQLite puedes consultarlos [aquí](https://www.sqlite.org/datatype3.html){:target="_blank"}.
 >
 >
 >Por ahora, escribamos una consulta SQL que muestre los nombres de los científicos.
@@ -184,7 +184,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >en minúsculas, pero no tenemos porqué como muestra el siguiente ejemplo,
 >SQL es [insensible a mayúsculas y minúsculas]({% link reference.md %}#case-insensitive).
 >
->~~~
+>~~~sql
 >SeLeCt FaMiLy, PeRsOnAl FrOm PeRsOn;
 >~~~
 >{: .sql}
@@ -211,7 +211,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >comando con `;` (punto y coma). Cuando presionas enter para un comando
 >sin agregar el `;` al final, puede verse más o menos así:
 >
->~~~
+>~~~sql
 >SELECT id FROM Person
 >...>
 >...>
@@ -226,7 +226,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >Siempre se **mostrarán** en algún orden, pero podemos controlar eso de varias maneras.
 >Por ejemplo, podríamos intercambiar las columnas en la salida escribiendo nuestra consulta como:
 >
->~~~
+>~~~sql
 >SELECT personal, family FROM Person;
 >~~~
 >{: .sql}
@@ -241,7 +241,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 >o incluso repetir columnas:
 >
->~~~
+>~~~sql
 >SELECT id, id, id FROM Person;
 >~~~
 >{: .sql}
@@ -256,7 +256,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 >A modo de atajo, podemos seleccionar todas las columnas de una tabla usando `*`:
 >
->~~~
+>~~~sql
 >SELECT * FROM Person;
 >~~~
 >{: .sql}
@@ -285,7 +285,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 > > .schema
 > > ~~~
 > > {: .sql}
-> > ~~~
+> > ~~~sql
 > > CREATE TABLE Person (id text, personal text, family text);
 > > CREATE TABLE Site (name text, lat real, long real);
 > > CREATE TABLE Survey (taken integer, person text, quant text, reading real);
@@ -302,7 +302,7 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 > > ## Solución
 > > 
-> > ~~~
+> > ~~~sql
 > > SELECT name FROM Site;
 > > ~~~
 > > {: .sql}
@@ -319,14 +319,14 @@ Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ pa
 >
 > Muchas personas escriben las consultas SQL dándole el siguente formato: 
 >
-> ~~~
+> ~~~sql
 > SELECT personal, family FROM person;
 > ~~~
 > {: .sql}
 >
 > o así:
 >
-> ~~~
+> ~~~sql
 > select Personal, Family from PERSON;
 > ~~~
 > {: .sql}
