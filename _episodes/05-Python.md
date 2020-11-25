@@ -1,5 +1,5 @@
 ---
-title: "Creación de nuevas tablas"
+title: "Carga masiva de datos en nuevas tablas"
 teaching: 15
 exercises: 60
 questions:
