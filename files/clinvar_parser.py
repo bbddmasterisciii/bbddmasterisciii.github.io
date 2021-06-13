@@ -114,7 +114,7 @@ def open_clinvar_db(db_file):
 		# created in a previous use
 		for tableDecl in CLINVAR_TABLE_DEFS:
 			cur.execute(tableDecl)
-	except sqlite3.Error:
+	except sqlite3.Error as e:
 		print("An error occurred: {}".format(e.args[0]), file=sys.stderr)
 	finally:
 		cur.close()
@@ -125,6 +125,10 @@ def store_clinvar_file(db,clinvar_file):
 	with gzip.open(clinvar_file,"rt",encoding="utf-8") as cf:
 		headerMapping = None
 		known_genes = set()
+		# This variable teaches the code that the file being
+		# parsed has new VCF coordinate, reference and alternate
+		# allele columns
+		newVCFCoords = False
 		
 		cur = db.cursor()
 		
@@ -143,6 +147,15 @@ def store_clinvar_file(db,clinvar_file):
 					for columnId, columnName in enumerate(columnNames):
 						headerMapping[columnName] = columnId
 					
+					newVCFCoords = 'PositionVCF' in headerMapping
+					if newVCFCoords:
+						refAlleleCol = headerMapping["ReferenceAlleleVCF"]
+						altAlleleCol = headerMapping["AlternateAlleleVCF"]
+						# 'PositionVCF' might be more important than 'Start'
+						# but the program is ignoring it for now
+					else:
+						refAlleleCol = headerMapping["ReferenceAllele"]
+						altAlleleCol = headerMapping["AlternateAllele"]
 				else:
 					# We are reading the file contents	
 					columnValues = re.split(r"\t",wline)
@@ -164,8 +177,8 @@ def store_clinvar_file(db,clinvar_file):
 					chro = columnValues[headerMapping["Chromosome"]]
 					chro_start = columnValues[headerMapping["Start"]]
 					chro_stop = columnValues[headerMapping["Stop"]]
-					ref_allele = columnValues[headerMapping["ReferenceAllele"]]
-					alt_allele = columnValues[headerMapping["AlternateAllele"]]
+					ref_allele = columnValues[refAlleleCol]
+					alt_allele = columnValues[altAlleleCol]
 					cytogenetic = columnValues[headerMapping["Cytogenetic"]]
 					variation_id = int(columnValues[headerMapping["VariationID"]])
 					
@@ -243,9 +256,14 @@ def store_clinvar_file(db,clinvar_file):
 					# Variant Phenotypes
 					variant_pheno_str = columnValues[headerMapping["PhenotypeIDS"]]
 					if variant_pheno_str is not None:
-						variant_pheno_list = re.split(r";",variant_pheno_str)
+						variant_pheno_list = re.split(r"[;|]",variant_pheno_str)
 						prep_pheno = []
 						for phen_group_id, variant_pheno in enumerate(variant_pheno_list):
+							if len(variant_pheno) == 0:
+								continue
+							if re.search("^[1-9][0-9]* conditions$", variant_pheno):
+								print("INFO: Long PhenotypeIDs {} {}: {}".format(allele_id, assembly, variant_pheno))
+								continue
 							variant_annots = re.split(r",",variant_pheno)
 							for variant_annot in variant_annots:
 								phen = variant_annot.split(":")
@@ -253,7 +271,7 @@ def store_clinvar_file(db,clinvar_file):
 									phen_ns , phen_id = phen[0:2]
 									prep_pheno.append((ventry_id,phen_group_id,phen_ns,phen_id))
 								elif variant_annot != "na":
-									print("DEBUG: {}\n\t{}\n\t{}".format(variant_annot,variant_pheno_str,line),file=sys.stderr)
+									print("DEBUG: {} {} {}\n\t{}\n\t{}".format(allele_id,assembly,variant_annot,variant_pheno_str,line),file=sys.stderr)
 						
 						cur.executemany("""
 							INSERT INTO variant_phenotypes(
