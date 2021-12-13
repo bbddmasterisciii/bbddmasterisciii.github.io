@@ -39,7 +39,7 @@ que significa "lenguaje de consultas estructurado".
 SQL proporciona cientos de formas diferentes de analizar y recombinar datos.
 Solo veremos un puñado de consultas, pero ese puñado explica la mayor parte de lo necesario para el trabajo científico.
 
-Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}{% link files/BBDD-Master2020_2021-0.pdf %}){:target="_blank"} para que podáis verla cuando queráis.
+Para que tengáis una mejor idea, os adjuntamos la [parte teórica en PDF]({{ page.root }}{% link files/BBDD-Master2021_2022_flat.pdf %}){:target="_blank"} para que podáis verla cuando queráis.
 > ## 0. Gestores de bases de datos
 >
 > Existen muchos gestores de bases de datos (Oracle, IBM DB2, PostgreSQL, MySQL, Microsoft Access y SQLite) y todos entienden dialectos del lenguaje SQL, 
