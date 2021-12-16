@@ -26,16 +26,6 @@ a nuestro ordenador y lo usaremos junto con el programa recién estudiado para i
 > Si todo ha funcionado correctamente, haremos lo mismo con el proteoma de dos organismos: [Mycoplasma mycoides]({{ page.root }}/files/MYCMS.dat){:target="_blank"} y [Staphylococcus aureus]({{ page.root }}/files/STAAN.dat){:target="_blank"}
 {: .callout}
 
-
->## 2. Creación de un fichero desde Python, usando información de la base de datos
->En este caso vamos a hacer el caso contrario, es decir, vamos a crear un programa en Python que automáticamente hará consultas a la base de datos de unos campos determinados. Los resultados de esa consulta se procesarán con Python para crear un fichero. De forma más concreta vamos a seleccionar los identificadores y descripción de cada proteína almacenada en nuestra base de datos y su secuencia
-> y con ello vamos a crear un fichero en formato [FASTA](https://es.wikipedia.org/wiki/Formato_FASTA){:target="_blank"}.
-> El programa lo podéis descargar desde este [link (fasta_write.py)]({{ page.root }}/files/fasta_write.py) y
-para poder revisarlo juntos, podéis pinchar en la [versión HTML]({{ page.root }}/files/fasta_write_py.html){:target="_blank"} donde aparece el programa con la sintaxis destacada en colores.
->
-{: .callout}
-
-
 >## 2. Consultas de agregación
 >Mediante consulta vamos a: 
 >* Recuperar una entrada por su accession number principal. 
