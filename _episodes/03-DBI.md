@@ -45,8 +45,8 @@ para poder revisarlo juntos, podéis pinchar en la [versión HTML]({{ page.root 
 >Mediante consultas de agregación, vamos a obtener los siguientes valores: 
 >* Número de entradas de UniProt insertadas. 
 >* Número de entradas de UniProt con una secuencia de más de 300 aminoácidos. 
->* Longitud media de las secuencias intertadas. 
->* Longitud de mayor tamaño de las secuencias intertadas.
+>* Longitud media de las secuencias insertadas. 
+>* Longitud de mayor tamaño de las secuencias insertadas.
 >* Identificador de la proteína con mayor tamaño.
 >* Calcular el número de accession number que hay por entrada. 
 >
