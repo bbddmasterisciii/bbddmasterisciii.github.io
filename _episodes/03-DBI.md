@@ -41,7 +41,7 @@ para poder revisarlo juntos, podéis pinchar en la [versión HTML]({{ page.root 
 >Mediante consulta vamos a: 
 >* Recuperar una entrada por su accession number principal. 
 >* Recuperar las entradas que tengan un peso molecular entre 30000 y 90000. 
->* Recuperar las entradas cuya descripción contenga un código enzimático. 
+>* Recuperar las entradas cuya descripción contenga la palabra "kinase". 
 >
 >Mediante consultas de agregación, vamos a obtener los siguientes valores: 
 >* Número de entradas de UniProt insertadas. 
