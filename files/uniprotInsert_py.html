@@ -1,153 +1,240 @@
-<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #888888">#!/usr/bin/env python3.8</span>
-<span style="color: #888888"># -*- coding: utf-8 -*-</span>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
-<span style="color: #DD4422">&#39;&#39;&#39;</span>
-<span style="color: #DD4422">	Prácticas de Python DB-API 2.0 (PEP-249) y bases de datos biológicas</span>
-<span style="color: #DD4422">	Script de inserción de entradas en formato SWISSPROT en la base de datos</span>
-<span style="color: #DD4422">&#39;&#39;&#39;</span>
+<head>
+	<title>/home/jmfernandez/projects/bbddmasterisciii.github.io/files/uniprotInsert.py</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta name="generator" content="Geany 1.38" />
+	<meta name="date" content="2021-12-16T14:57:47+0100" />
+	<style type="text/css">
+	body
+	{
+		font-family: Liberation Mono, monospace;
+		font-size: 10pt;
+	}
+	.style_1
+	{
+		color: #d00000;
+		background-color: #ffffff;
+	}
+	.style_2
+	{
+		color: #007f00;
+		background-color: #ffffff;
+	}
+	.style_3
+	{
+		color: #ff8000;
+		background-color: #ffffff;
+	}
+	.style_4
+	{
+		color: #ff8000;
+		background-color: #ffffff;
+	}
+	.style_5
+	{
+		color: #00007f;
+		background-color: #ffffff;
+		font-weight: bold;
+	}
+	.style_6
+	{
+		color: #008000;
+		background-color: #ffffff;
+	}
+	.style_8
+	{
+		color: #0000d0;
+		background-color: #ffffff;
+		font-weight: bold;
+	}
+	.style_9
+	{
+		color: #000080;
+		background-color: #ffffff;
+	}
+	.style_10
+	{
+		color: #301010;
+		background-color: #ffffff;
+	}
+	.style_11
+	{
+		color: #000000;
+		background-color: #ffffff;
+	}
+	.style_14
+	{
+		color: #991111;
+		background-color: #ffffff;
+		font-weight: bold;
+	}
 
-<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">sys</span>
-<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">re</span>
-<span style="color: #008800; font-weight: bold">import</span> <span style="color: #0e84b5; font-weight: bold">sqlite3</span> <span style="color: #008800; font-weight: bold">as</span> <span style="color: #0e84b5; font-weight: bold">dbi</span>
+	</style>
+</head>
 
-<span style="color: #DD4422">&#39;&#39;&#39;</span>
-<span style="color: #DD4422">Estas variables globales contienen los parámetros de conexión a la base de datos</span>
-<span style="color: #DD4422">&#39;&#39;&#39;</span>
-dbname<span style="color: #333333">=</span><span style="background-color: #fff0f0">&#39;uniprot.db&#39;</span>	<span style="color: #888888"># El nombre de la base de datos, que tendréis que cambiarlo si no habeisd usado el mismo que nosotros</span>
-
-<span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">SWParser</span>(<span style="color: #007020">object</span>):
-	<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">__init__</span>(<span style="color: #007020">self</span>,filename):
-		<span style="color: #007020">self</span><span style="color: #333333">.</span>filename <span style="color: #333333">=</span> filename
-	
-	<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">__iter__</span>(<span style="color: #007020">self</span>):
-		<span style="color: #888888"># Estamos abriendo el fichero con el encoding &#39;latin-1&#39;</span>
-		<span style="color: #888888"># Para text mining lo recomendable es el encoding &#39;utf-8&#39;</span>
-		<span style="color: #007020">self</span><span style="color: #333333">.</span>infile <span style="color: #333333">=</span> <span style="color: #007020">open</span>(<span style="color: #007020">self</span><span style="color: #333333">.</span>filename,<span style="background-color: #fff0f0">&#39;r&#39;</span>,encoding<span style="color: #333333">=</span><span style="background-color: #fff0f0">&quot;latin-1&quot;</span>)
-		<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Procesando fichero &quot;</span>,<span style="color: #007020">self</span><span style="color: #333333">.</span>filename)
-		
-		<span style="color: #008800; font-weight: bold">return</span> <span style="color: #007020">self</span>
-	
-	<span style="color: #008800; font-weight: bold">def</span> <span style="color: #0066BB; font-weight: bold">__next__</span>(<span style="color: #007020">self</span>):
-		<span style="color: #888888"># Inicialización de variables</span>
-		acc <span style="color: #333333">=</span> []
-		<span style="color: #007020">id</span> <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
-		lastdate <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
-		description <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
-		sequence <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
-		molw <span style="color: #333333">=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>
-		readingseq <span style="color: #333333">=</span> <span style="color: #007020">False</span>
-		<span style="color: #008800; font-weight: bold">for</span> line <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">self</span><span style="color: #333333">.</span>infile:
-			<span style="color: #888888"># Lo primero, quitar el salto de lÃ­nea</span>
-			line <span style="color: #333333">=</span> line<span style="color: #333333">.</span>rstrip(<span style="background-color: #fff0f0">&#39;</span><span style="color: #666666; font-weight: bold; background-color: #fff0f0">\n</span><span style="background-color: #fff0f0">&#39;</span>)
-			
-			<span style="color: #888888"># Detección del final del registro</span>
-			<span style="color: #008800; font-weight: bold">if</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">&#39;^//&#39;</span>,line) <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-				<span style="color: #888888"># Cuando se ha terminado de leer un</span>
-				<span style="color: #888888"># registro hay que proceder a guardar</span>
-				<span style="color: #888888"># los datos en la base de datos</span>
-				
-				<span style="color: #008800; font-weight: bold">if</span> description <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;&#39;</span>:
-					description <span style="color: #333333">=</span> <span style="color: #007020">None</span>
-				
-				<span style="color: #888888"># Impresión de comprobación</span>
-				<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;ACC: {0} ; ID: {1} ; Last: {2}&quot;</span><span style="color: #333333">.</span>format(acc[<span style="color: #0000DD; font-weight: bold">0</span>],<span style="color: #007020">id</span>,lastdate))
-				
-				<span style="color: #008800; font-weight: bold">return</span> acc,<span style="color: #007020">id</span>,lastdate,description,sequence,molw
-			
-			<span style="color: #888888"># ¿Estoy leyendo una secuencia?</span>
-			<span style="color: #008800; font-weight: bold">if</span> readingseq:
-				<span style="color: #888888"># Quito todos los espacios intermedios </span>
-				line <span style="color: #333333">=</span> re<span style="color: #333333">.</span>compile(<span style="background-color: #fff0f0">r&quot;\s+&quot;</span>)<span style="color: #333333">.</span>sub(<span style="background-color: #fff0f0">&#39;&#39;</span>,line)
-				
-				<span style="color: #888888"># Y concateno</span>
-				sequence <span style="color: #333333">+=</span> line
-				
-			<span style="color: #888888"># Como no la estoy leyendo, busco los patrones apropiados</span>
-			<span style="color: #008800; font-weight: bold">else</span>:
-				seqmatch <span style="color: #333333">=</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">r&quot;^SQ.+[^0-9](\d+) MW&quot;</span>,line)
-				matched <span style="color: #333333">=</span> seqmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>
-				
-				idmatch <span style="color: #333333">=</span> <span style="color: #007020">None</span> <span style="color: #008800; font-weight: bold">if</span> matched <span style="color: #008800; font-weight: bold">else</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">r&quot;^ID   ([a-zA-Z0-9_]+)&quot;</span>,line)
-				matched <span style="color: #333333">=</span> matched <span style="color: #000000; font-weight: bold">or</span> idmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>
-				
-				dtmatch <span style="color: #333333">=</span> <span style="color: #007020">None</span> <span style="color: #008800; font-weight: bold">if</span> matched <span style="color: #008800; font-weight: bold">else</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">r&quot;^DT   (\d{2}-[A-Z]{3}-\d{4}),&quot;</span>,line)
-				matched <span style="color: #333333">=</span> matched <span style="color: #000000; font-weight: bold">or</span> dtmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>
-				
-				acmatch <span style="color: #333333">=</span> <span style="color: #007020">None</span> <span style="color: #008800; font-weight: bold">if</span> matched <span style="color: #008800; font-weight: bold">else</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">r&quot;^AC   (.+)&quot;</span>,line)
-				matched <span style="color: #333333">=</span> matched <span style="color: #000000; font-weight: bold">or</span> acmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>
-				
-				dematch <span style="color: #333333">=</span> <span style="color: #007020">None</span> <span style="color: #008800; font-weight: bold">if</span> matched <span style="color: #008800; font-weight: bold">else</span> re<span style="color: #333333">.</span>search(<span style="background-color: #fff0f0">r&quot;^DE   RecName: Full=(.+);&quot;</span>,line)
-				matched <span style="color: #333333">=</span> matched <span style="color: #000000; font-weight: bold">or</span> dematch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>
-				
-				<span style="color: #008800; font-weight: bold">if</span> matched:
-					<span style="color: #008800; font-weight: bold">if</span> seqmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># Extracción del peso molecular</span>
-						<span style="color: #888888"># y comienzo de secuencia</span>
-						molw <span style="color: #333333">=</span> seqmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
-						
-						readingseq <span style="color: #333333">=</span> <span style="color: #007020">True</span>
-					<span style="color: #008800; font-weight: bold">elif</span> idmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># Identificador</span>
-						<span style="color: #007020">id</span> <span style="color: #333333">=</span> idmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
-					<span style="color: #008800; font-weight: bold">elif</span> dtmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># Fecha de la Ãºltima actualización</span>
-						lastdate <span style="color: #333333">=</span> dtmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
-					<span style="color: #008800; font-weight: bold">elif</span> acmatch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># Los accnumber, que pueden estar en varias líneas</span>
-						ac <span style="color: #333333">=</span> acmatch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
-						<span style="color: #888888"># Elimino los espacios y quito el posible Último punto y coma</span>
-						ac <span style="color: #333333">=</span> re<span style="color: #333333">.</span>compile(<span style="background-color: #fff0f0">r&quot;\s+&quot;</span>)<span style="color: #333333">.</span>sub(<span style="background-color: #fff0f0">&#39;&#39;</span>,ac)<span style="color: #333333">.</span>rstrip(<span style="background-color: #fff0f0">&#39;;&#39;</span>)
-						
-						<span style="color: #888888"># Rompo por los puntos y coma, y</span>
-						<span style="color: #888888"># añado a la lista de accnumber</span>
-						acc<span style="color: #333333">.</span>extend(ac<span style="color: #333333">.</span>split(<span style="background-color: #fff0f0">&#39;;&#39;</span>))
-					<span style="color: #008800; font-weight: bold">elif</span> dematch <span style="color: #000000; font-weight: bold">is</span> <span style="color: #000000; font-weight: bold">not</span> <span style="color: #007020">None</span>:
-						<span style="color: #888888"># La descripción, que puede estar en varias líneas</span>
-						<span style="color: #008800; font-weight: bold">if</span> description <span style="color: #333333">!=</span> <span style="background-color: #fff0f0">&#39;&#39;</span>:
-							description <span style="color: #333333">+=</span> <span style="background-color: #fff0f0">&#39;, EC &#39;</span>
-						description <span style="color: #333333">+=</span> dematch<span style="color: #333333">.</span>group(<span style="color: #0000DD; font-weight: bold">1</span>)
-		
-		<span style="color: #888888"># Se cierra el fichero procesado</span>
-		<span style="color: #007020">self</span><span style="color: #333333">.</span>infile<span style="color: #333333">.</span>close()
-		
-		<span style="color: #888888"># Y como hemos terminado, lo indicamos</span>
-		<span style="color: #008800; font-weight: bold">raise</span> <span style="color: #FF0000; font-weight: bold">StopIteration</span>
-
-
-<span style="color: #888888"># Comprobación del número de parámetros de entrada</span>
-<span style="color: #008800; font-weight: bold">if</span> __name__ <span style="color: #333333">==</span> <span style="background-color: #fff0f0">&#39;__main__&#39;</span>:
-	<span style="color: #008800; font-weight: bold">if</span> <span style="color: #007020">len</span>(sys<span style="color: #333333">.</span>argv)<span style="color: #333333">&gt;</span><span style="color: #0000DD; font-weight: bold">1</span>:
-		<span style="color: #008800; font-weight: bold">try</span>:
-    		<span style="color: #888888"># Apertura de la conexión con la base de datos</span>
-			conn <span style="color: #333333">=</span> dbi<span style="color: #333333">.</span>connect(dbname)
-			<span style="color: #888888"># Obtención de un cursor para enviar operaciones a la base de datos</span>
-			<span style="color: #888888"># Tiene que tener nombre para evitar que explote en memoria con la siguiente sentencia</span>
-			cur <span style="color: #333333">=</span> conn<span style="color: #333333">.</span>cursor()
-		<span style="color: #008800; font-weight: bold">except</span> dbi<span style="color: #333333">.</span>Error <span style="color: #008800; font-weight: bold">as</span> e:
-			<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Ha habido un problema al conectar a la base de datos: &quot;</span>,e<span style="color: #333333">.</span>diag<span style="color: #333333">.</span>message_primary,<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
-			<span style="color: #008800; font-weight: bold">raise</span>
-		<span style="color: #888888"># Procesamiento de cada fichero</span>
-		<span style="color: #008800; font-weight: bold">with</span> conn:
-			<span style="color: #008800; font-weight: bold">for</span> infile <span style="color: #000000; font-weight: bold">in</span> sys<span style="color: #333333">.</span>argv[<span style="color: #0000DD; font-weight: bold">1</span>:]:
-				<span style="color: #008800; font-weight: bold">try</span>:
-					<span style="color: #008800; font-weight: bold">for</span> acc,<span style="color: #007020">id</span>,lastdate,description,sequence,molw <span style="color: #000000; font-weight: bold">in</span> <span style="color: #007020">iter</span>(SWParser(infile)):
-							<span style="color: #888888"># Preparación de las operaciones de inserción a realizar repetidamente</span>
-							<span style="color: #888888"># (Debería hacer un chequeo aquí, para comprobar que funcionan)</span>
-						cur<span style="color: #333333">.</span>execute(<span style="background-color: #fff0f0">&#39;INSERT INTO SWISSENTRY VALUES (?,?,?,?,?,?)&#39;</span>,(acc[<span style="color: #0000DD; font-weight: bold">0</span>],<span style="color: #007020">id</span>,lastdate,description,sequence,molw))
-						<span style="color: #008800; font-weight: bold">for</span> accnumber <span style="color: #000000; font-weight: bold">in</span> acc:
-								cur<span style="color: #333333">.</span>execute(<span style="background-color: #fff0f0">&#39;INSERT INTO ACCNUMBERS(main_accnumber,accnumber) VALUES (?,?)&#39;</span>,(acc[<span style="color: #0000DD; font-weight: bold">0</span>],accnumber))
-				<span style="color: #008800; font-weight: bold">except</span> dbi<span style="color: #333333">.</span>Error <span style="color: #008800; font-weight: bold">as</span> e:
-					<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Error al insertar en la base de datos: &quot;</span>,e<span style="color: #333333">.</span>diag<span style="color: #333333">.</span>message_primary,<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
-					<span style="color: #008800; font-weight: bold">raise</span>
-				<span style="color: #008800; font-weight: bold">except</span> <span style="color: #FF0000; font-weight: bold">IOError</span> <span style="color: #008800; font-weight: bold">as</span> e:
-					<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Error de lectura de fichero {0}: {1}&quot;</span><span style="color: #333333">.</span>format(e<span style="color: #333333">.</span>errno, e<span style="color: #333333">.</span>strerror),<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
-					<span style="color: #888888">#raise</span>
-				<span style="color: #008800; font-weight: bold">except</span>:
-					<span style="color: #008800; font-weight: bold">print</span>(<span style="background-color: #fff0f0">&quot;Error inesperado: &quot;</span>, sys<span style="color: #333333">.</span>exc_info()[<span style="color: #0000DD; font-weight: bold">0</span>],<span style="color: #007020">file</span><span style="color: #333333">=</span>sys<span style="color: #333333">.</span>stderr)
-					<span style="color: #008800; font-weight: bold">raise</span>
-		
-	<span style="color: #008800; font-weight: bold">else</span>:
-		<span style="color: #008800; font-weight: bold">raise</span> <span style="color: #FF0000; font-weight: bold">AssertionError</span>(<span style="background-color: #fff0f0">&quot;Debes introducir al menos un fichero con formato SW.&quot;</span>)
-        
-</pre></div>
-
+<body>
+<p>
+<span class="style_1">#!/usr/bin/env&nbsp;python3.8</span><br />
+<span class="style_1">#&nbsp;-*-&nbsp;coding:&nbsp;utf-8&nbsp;-*-</span><br />
+<br />
+<span class="style_6">'''</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_6">Prácticas&nbsp;de&nbsp;Python&nbsp;DB-API&nbsp;2.0&nbsp;(PEP-249)&nbsp;y&nbsp;bases&nbsp;de&nbsp;datos&nbsp;biológicas</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_6">Script&nbsp;de&nbsp;inserción&nbsp;de&nbsp;entradas&nbsp;en&nbsp;formato&nbsp;SWISSPROT&nbsp;en&nbsp;la&nbsp;base&nbsp;de&nbsp;datos</span><br />
+<span class="style_6">'''</span><br />
+<br />
+<span class="style_5">import&nbsp;</span><span class="style_11">sys</span><br />
+<span class="style_5">import&nbsp;</span><span class="style_11">re</span><br />
+<span class="style_5">import&nbsp;</span><span class="style_11">sqlite3&nbsp;</span><span class="style_5">as&nbsp;</span><span class="style_11">dbi</span><br />
+<br />
+<span class="style_6">'''</span><br />
+<span class="style_6">Estas&nbsp;variables&nbsp;globales&nbsp;contienen&nbsp;los&nbsp;parámetros&nbsp;de&nbsp;conexión&nbsp;a&nbsp;la&nbsp;base&nbsp;de&nbsp;datos</span><br />
+<span class="style_6">'''</span><br />
+<span class="style_11">dbname</span><span class="style_10">=</span><span class="style_4">'uniprot.db'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="style_1">#&nbsp;El&nbsp;nombre&nbsp;de&nbsp;la&nbsp;base&nbsp;de&nbsp;datos,&nbsp;que&nbsp;tendréis&nbsp;que&nbsp;cambiarlo</span><br />
+<br />
+<span class="style_5">class&nbsp;</span><span class="style_8">SWParser</span><span class="style_10">(</span><span class="style_14">object</span><span class="style_10">):</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">def&nbsp;</span><span class="style_9">__init__</span><span class="style_10">(</span><span class="style_11">self</span><span class="style_10">,</span><span class="style_11">filename</span><span class="style_10">):</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">self</span><span class="style_10">.</span><span class="style_11">filename&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">filename</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">def&nbsp;</span><span class="style_9">__iter__</span><span class="style_10">(</span><span class="style_11">self</span><span class="style_10">):</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Estamos&nbsp;abriendo&nbsp;el&nbsp;fichero&nbsp;con&nbsp;el&nbsp;encoding&nbsp;'latin-1'</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Para&nbsp;text&nbsp;mining&nbsp;lo&nbsp;recomendable&nbsp;es&nbsp;el&nbsp;encoding&nbsp;'utf-8'</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">self</span><span class="style_10">.</span><span class="style_11">infile&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_14">open</span><span class="style_10">(</span><span class="style_11">self</span><span class="style_10">.</span><span class="style_11">filename</span><span class="style_10">,</span><span class="style_4">'r'</span><span class="style_10">,</span><span class="style_11">encoding</span><span class="style_10">=</span><span class="style_3">"latin-1"</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">print</span><span class="style_10">(</span><span class="style_3">"Procesando&nbsp;fichero&nbsp;"</span><span class="style_10">,</span><span class="style_11">self</span><span class="style_10">.</span><span class="style_11">filename</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">return&nbsp;</span><span class="style_11">self</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">def&nbsp;</span><span class="style_9">__next__</span><span class="style_10">(</span><span class="style_11">self</span><span class="style_10">):</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Inicialización&nbsp;de&nbsp;variables</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">acc&nbsp;</span><span class="style_10">=&nbsp;[]</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_14">id&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_4">''</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">lastdate&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_4">''</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">description&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_4">''</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">sequence&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_4">''</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">molw&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_4">''</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">readingseq&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">False</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">for&nbsp;</span><span class="style_11">line&nbsp;</span><span class="style_5">in&nbsp;</span><span class="style_11">self</span><span class="style_10">.</span><span class="style_11">infile</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Lo&nbsp;primero,&nbsp;quitar&nbsp;el&nbsp;salto&nbsp;de&nbsp;línea</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">line&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">line</span><span class="style_10">.</span><span class="style_11">rstrip</span><span class="style_10">(</span><span class="style_4">'\n'</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Detección&nbsp;del&nbsp;final&nbsp;del&nbsp;registro</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">search</span><span class="style_10">(</span><span class="style_4">'^//'</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Cuando&nbsp;se&nbsp;ha&nbsp;terminado&nbsp;de&nbsp;leer&nbsp;un</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;registro&nbsp;hay&nbsp;que&nbsp;proceder&nbsp;a&nbsp;guardar</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;los&nbsp;datos&nbsp;en&nbsp;la&nbsp;base&nbsp;de&nbsp;datos</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_11">description&nbsp;</span><span class="style_10">==&nbsp;</span><span class="style_4">''</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">description&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">None</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Impresión&nbsp;de&nbsp;comprobación</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">print</span><span class="style_10">(</span><span class="style_3">"ACC:&nbsp;{0}&nbsp;;&nbsp;ID:&nbsp;{1}&nbsp;;&nbsp;Last:&nbsp;{2}"</span><span class="style_10">.</span><span class="style_11">format</span><span class="style_10">(</span><span class="style_11">acc</span><span class="style_10">[</span><span class="style_2">0</span><span class="style_10">],</span><span class="style_14">id</span><span class="style_10">,</span><span class="style_11">lastdate</span><span class="style_10">))</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">return&nbsp;</span><span class="style_11">acc</span><span class="style_10">,</span><span class="style_14">id</span><span class="style_10">,</span><span class="style_11">lastdate</span><span class="style_10">,</span><span class="style_11">description</span><span class="style_10">,</span><span class="style_11">sequence</span><span class="style_10">,</span><span class="style_11">molw</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;¿Estoy&nbsp;leyendo&nbsp;una&nbsp;secuencia?</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_11">readingseq</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Quito&nbsp;todos&nbsp;los&nbsp;espacios&nbsp;intermedios&nbsp;</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">line&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">compile</span><span class="style_10">(</span><span class="style_3">r"\s+"</span><span class="style_10">).</span><span class="style_11">sub</span><span class="style_10">(</span><span class="style_4">''</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Y&nbsp;concateno</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">sequence&nbsp;</span><span class="style_10">+=&nbsp;</span><span class="style_11">line</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Como&nbsp;no&nbsp;la&nbsp;estoy&nbsp;leyendo,&nbsp;busco&nbsp;los&nbsp;patrones&nbsp;apropiados</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">else</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">seqmatch&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">search</span><span class="style_10">(</span><span class="style_3">r"^SQ.+[^0-9](\d+)&nbsp;MW"</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">matched&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">seqmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">idmatch&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">None&nbsp;if&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">else&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">search</span><span class="style_10">(</span><span class="style_3">r"^ID&nbsp;&nbsp;&nbsp;([a-zA-Z0-9_]+)"</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">matched&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">or&nbsp;</span><span class="style_11">idmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">dtmatch&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">None&nbsp;if&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">else&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">search</span><span class="style_10">(</span><span class="style_3">r"^DT&nbsp;&nbsp;&nbsp;(\d{2}-[A-Z]{3}-\d{4}),"</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">matched&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">or&nbsp;</span><span class="style_11">dtmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">acmatch&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">None&nbsp;if&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">else&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">search</span><span class="style_10">(</span><span class="style_3">r"^AC&nbsp;&nbsp;&nbsp;(.+)"</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">matched&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">or&nbsp;</span><span class="style_11">acmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">dematch&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">None&nbsp;if&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">else&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">search</span><span class="style_10">(</span><span class="style_3">r"^DE&nbsp;&nbsp;&nbsp;RecName:&nbsp;Full=(.+);"</span><span class="style_10">,</span><span class="style_11">line</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">matched&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">matched&nbsp;</span><span class="style_5">or&nbsp;</span><span class="style_11">dematch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_11">matched</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_11">seqmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Extracción&nbsp;del&nbsp;peso&nbsp;molecular</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;y&nbsp;comienzo&nbsp;de&nbsp;secuencia</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">molw&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">seqmatch</span><span class="style_10">.</span><span class="style_11">group</span><span class="style_10">(</span><span class="style_2">1</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">readingseq&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_5">True</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">elif&nbsp;</span><span class="style_11">idmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Identificador</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_14">id&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">idmatch</span><span class="style_10">.</span><span class="style_11">group</span><span class="style_10">(</span><span class="style_2">1</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">elif&nbsp;</span><span class="style_11">dtmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Fecha&nbsp;de&nbsp;la&nbsp;última&nbsp;actualización</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">lastdate&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">dtmatch</span><span class="style_10">.</span><span class="style_11">group</span><span class="style_10">(</span><span class="style_2">1</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">elif&nbsp;</span><span class="style_11">acmatch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Los&nbsp;accnumber,&nbsp;que&nbsp;pueden&nbsp;estar&nbsp;en&nbsp;varias&nbsp;líneas</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">ac&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">acmatch</span><span class="style_10">.</span><span class="style_11">group</span><span class="style_10">(</span><span class="style_2">1</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Elimino&nbsp;los&nbsp;espacios&nbsp;y&nbsp;quito&nbsp;el&nbsp;posible&nbsp;último&nbsp;punto&nbsp;y&nbsp;coma</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">ac&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">re</span><span class="style_10">.</span><span class="style_11">compile</span><span class="style_10">(</span><span class="style_3">r"\s+"</span><span class="style_10">).</span><span class="style_11">sub</span><span class="style_10">(</span><span class="style_4">''</span><span class="style_10">,</span><span class="style_11">ac</span><span class="style_10">).</span><span class="style_11">rstrip</span><span class="style_10">(</span><span class="style_4">';'</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Rompo&nbsp;por&nbsp;los&nbsp;puntos&nbsp;y&nbsp;coma,&nbsp;y</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;añado&nbsp;a&nbsp;la&nbsp;lista&nbsp;de&nbsp;accnumber</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">acc</span><span class="style_10">.</span><span class="style_11">extend</span><span class="style_10">(</span><span class="style_11">ac</span><span class="style_10">.</span><span class="style_11">split</span><span class="style_10">(</span><span class="style_4">';'</span><span class="style_10">))</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">elif&nbsp;</span><span class="style_11">dematch&nbsp;</span><span class="style_5">is&nbsp;not&nbsp;None</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;La&nbsp;descripción,&nbsp;que&nbsp;puede&nbsp;estar&nbsp;en&nbsp;varias&nbsp;líneas</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_11">description&nbsp;</span><span class="style_10">!=&nbsp;</span><span class="style_4">''</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">description&nbsp;</span><span class="style_10">+=&nbsp;</span><span class="style_4">',&nbsp;EC&nbsp;'</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">description&nbsp;</span><span class="style_10">+=&nbsp;</span><span class="style_11">dematch</span><span class="style_10">.</span><span class="style_11">group</span><span class="style_10">(</span><span class="style_2">1</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Se&nbsp;cierra&nbsp;el&nbsp;fichero&nbsp;procesado</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">self</span><span class="style_10">.</span><span class="style_11">infile</span><span class="style_10">.</span><span class="style_11">close</span><span class="style_10">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Y&nbsp;como&nbsp;hemos&nbsp;terminado,&nbsp;lo&nbsp;indicamos</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">raise&nbsp;</span><span class="style_14">StopIteration</span><br />
+<br />
+<br />
+<span class="style_1">#&nbsp;Comprobación&nbsp;del&nbsp;número&nbsp;de&nbsp;parámetros&nbsp;de&nbsp;entrada</span><br />
+<span class="style_5">if&nbsp;</span><span class="style_14">__name__&nbsp;</span><span class="style_10">==&nbsp;</span><span class="style_4">'__main__'</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;sys.argv&nbsp;contiene&nbsp;tanto&nbsp;el&nbsp;nombre&nbsp;del&nbsp;script&nbsp;como&nbsp;los&nbsp;parámetros</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;que&nbsp;se&nbsp;le&nbsp;introdujeron&nbsp;por&nbsp;línea&nbsp;de&nbsp;comandos&nbsp;al&nbsp;llamar&nbsp;al&nbsp;programa</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">if&nbsp;</span><span class="style_14">len</span><span class="style_10">(</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">argv</span><span class="style_10">)&gt;</span><span class="style_2">1</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">infiles&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">argv</span><span class="style_10">[</span><span class="style_2">1</span><span class="style_10">:]</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Apertura&nbsp;de&nbsp;la&nbsp;conexión&nbsp;con&nbsp;la&nbsp;base&nbsp;de&nbsp;datos</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">try</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">conn&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">dbi</span><span class="style_10">.</span><span class="style_11">connect</span><span class="style_10">(</span><span class="style_11">dbname</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Obtención&nbsp;de&nbsp;un&nbsp;cursor&nbsp;para&nbsp;enviar&nbsp;operaciones&nbsp;a&nbsp;la&nbsp;base&nbsp;de&nbsp;datos</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">cur&nbsp;</span><span class="style_10">=&nbsp;</span><span class="style_11">conn</span><span class="style_10">.</span><span class="style_11">cursor</span><span class="style_10">()</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Esto&nbsp;sirve&nbsp;para&nbsp;que&nbsp;cada&nbsp;sentencia&nbsp;se&nbsp;ejecute&nbsp;inmediatamente</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#conn.autocommit&nbsp;=&nbsp;True</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">except&nbsp;</span><span class="style_11">dbi</span><span class="style_10">.</span><span class="style_11">Error&nbsp;</span><span class="style_5">as&nbsp;</span><span class="style_11">e</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">print</span><span class="style_10">(</span><span class="style_3">"Ha&nbsp;habido&nbsp;un&nbsp;problema&nbsp;al&nbsp;conectar&nbsp;a&nbsp;la&nbsp;base&nbsp;de&nbsp;datos:&nbsp;"</span><span class="style_10">,</span><span class="style_11">e</span><span class="style_10">.</span><span class="style_11">diag</span><span class="style_10">.</span><span class="style_11">message_primary</span><span class="style_10">,</span><span class="style_14">file</span><span class="style_10">=</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">stderr</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">raise</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Trabajo&nbsp;a&nbsp;nivel&nbsp;de&nbsp;transacción</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">with&nbsp;</span><span class="style_11">conn</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Procesamiento&nbsp;de&nbsp;cada&nbsp;fichero</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">for&nbsp;</span><span class="style_11">infile&nbsp;</span><span class="style_5">in&nbsp;</span><span class="style_11">infiles</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">try</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Recuperar&nbsp;entradas&nbsp;una&nbsp;a&nbsp;una&nbsp;con&nbsp;un&nbsp;iterador</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">for&nbsp;</span><span class="style_11">acc</span><span class="style_10">,</span><span class="style_14">id</span><span class="style_10">,</span><span class="style_11">lastdate</span><span class="style_10">,</span><span class="style_11">description</span><span class="style_10">,</span><span class="style_11">sequence</span><span class="style_10">,</span><span class="style_11">molw&nbsp;</span><span class="style_5">in&nbsp;</span><span class="style_14">iter</span><span class="style_10">(</span><span class="style_11">SWParser</span><span class="style_10">(</span><span class="style_11">infile</span><span class="style_10">)):</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;Preparación&nbsp;de&nbsp;las&nbsp;operaciones&nbsp;de&nbsp;inserción&nbsp;a&nbsp;realizar&nbsp;repetidamente</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#&nbsp;(Debería&nbsp;hacer&nbsp;un&nbsp;chequeo&nbsp;aquí,&nbsp;para&nbsp;comprobar&nbsp;que&nbsp;funcionan)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">cur</span><span class="style_10">.</span><span class="style_11">execute</span><span class="style_10">(</span><span class="style_4">'INSERT&nbsp;INTO&nbsp;SWISSENTRY&nbsp;VALUES&nbsp;(?,?,?,?,?,?)'</span><span class="style_10">,(</span><span class="style_11">acc</span><span class="style_10">[</span><span class="style_2">0</span><span class="style_10">],</span><span class="style_14">id</span><span class="style_10">,</span><span class="style_11">lastdate</span><span class="style_10">,</span><span class="style_11">description</span><span class="style_10">,</span><span class="style_11">sequence</span><span class="style_10">,</span><span class="style_11">molw</span><span class="style_10">))</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">for&nbsp;</span><span class="style_11">accnumber&nbsp;</span><span class="style_5">in&nbsp;</span><span class="style_11">acc</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_11">cur</span><span class="style_10">.</span><span class="style_11">execute</span><span class="style_10">(</span><span class="style_4">'INSERT&nbsp;INTO&nbsp;ACCNUMBERS(main_accnumber,accnumber)&nbsp;VALUES&nbsp;(?,?)'</span><span class="style_10">,(</span><span class="style_11">acc</span><span class="style_10">[</span><span class="style_2">0</span><span class="style_10">],</span><span class="style_11">accnumber</span><span class="style_10">))</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">except&nbsp;</span><span class="style_11">dbi</span><span class="style_10">.</span><span class="style_11">Error&nbsp;</span><span class="style_5">as&nbsp;</span><span class="style_11">e</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">print</span><span class="style_10">(</span><span class="style_3">"Error&nbsp;al&nbsp;insertar&nbsp;en&nbsp;la&nbsp;base&nbsp;de&nbsp;datos:&nbsp;"</span><span class="style_10">,</span><span class="style_11">e</span><span class="style_10">.</span><span class="style_11">diag</span><span class="style_10">.</span><span class="style_11">message_primary</span><span class="style_10">,</span><span class="style_14">file</span><span class="style_10">=</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">stderr</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">raise</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">except&nbsp;</span><span class="style_14">IOError&nbsp;</span><span class="style_5">as&nbsp;</span><span class="style_11">e</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">print</span><span class="style_10">(</span><span class="style_3">"Error&nbsp;de&nbsp;lectura&nbsp;de&nbsp;fichero&nbsp;{0}:&nbsp;{1}"</span><span class="style_10">.</span><span class="style_11">format</span><span class="style_10">(</span><span class="style_11">e</span><span class="style_10">.</span><span class="style_11">errno</span><span class="style_10">,&nbsp;</span><span class="style_11">e</span><span class="style_10">.</span><span class="style_11">strerror</span><span class="style_10">),</span><span class="style_14">file</span><span class="style_10">=</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">stderr</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_1">#raise</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">except</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">print</span><span class="style_10">(</span><span class="style_3">"Error&nbsp;inesperado:&nbsp;"</span><span class="style_10">,&nbsp;</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">exc_info</span><span class="style_10">()[</span><span class="style_2">0</span><span class="style_10">],</span><span class="style_14">file</span><span class="style_10">=</span><span class="style_11">sys</span><span class="style_10">.</span><span class="style_11">stderr</span><span class="style_10">)</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">raise</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">else</span><span class="style_10">:</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="style_5">raise&nbsp;</span><span class="style_14">AssertionError</span><span class="style_10">(</span><span class="style_3">"Debes&nbsp;introducir&nbsp;al&nbsp;menos&nbsp;un&nbsp;fichero&nbsp;con&nbsp;formato&nbsp;SW."</span><span class="style_10">)</span>
+</p>
+</body>
+</html>
