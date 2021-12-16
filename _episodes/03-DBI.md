@@ -36,7 +36,7 @@ para poder revisarlo juntos, podéis pinchar en la [versión HTML]({{ page.root 
 {: .callout}
 
 
->## 3. Consultas de agregación
+>## 2. Consultas de agregación
 >Mediante consulta vamos a: 
 >* Recuperar una entrada por su accession number principal. 
 >* Recuperar las entradas que tengan un peso molecular entre 30000 y 90000. 
@@ -52,6 +52,14 @@ para poder revisarlo juntos, podéis pinchar en la [versión HTML]({{ page.root 
 >
 {: .callout}
 
+
+>## 3. Creación de un fichero desde Python, usando información de la base de datos
+>En este caso vamos a hacer el caso contrario, es decir, vamos a crear un programa en Python que automáticamente hará consultas a la base de datos de unos campos determinados. Los resultados de esa consulta se procesarán con Python para crear un fichero. De forma más concreta vamos a seleccionar los identificadores y descripción de cada proteína almacenada en nuestra base de datos y su secuencia
+> y con ello vamos a crear un fichero en formato [FASTA](https://es.wikipedia.org/wiki/Formato_FASTA){:target="_blank"}.
+> El programa lo podéis descargar desde este [link (fasta_write.py)]({{ page.root }}/files/fasta_write.py) y
+para poder revisarlo juntos, podéis pinchar en la [versión HTML]({{ page.root }}/files/fasta_write_py.html){:target="_blank"} donde aparece el programa con la sintaxis destacada en colores.
+>
+{: .callout}
 
 > ## ¿Cómo recuperarias el ID y el tamaño de secuencia de la proteína con accnumber Q7A6N0?
 >
