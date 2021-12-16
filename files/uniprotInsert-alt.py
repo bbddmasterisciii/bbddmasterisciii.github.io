@@ -15,28 +15,24 @@ Estas variables globales contienen los parámetros de conexión a la base de dat
 '''
 dbname='uniprot.db'	# El nombre de la base de datos, que tendréis que cambiarlo
 
-class SWParser(object):
-	def __init__(self,filename):
-		self.filename = filename
+def siguienteEntrada(uniF):
+	'''
+	Este método toma como entrada un manejador de ficheros abierto
+	de manera que quien llame repetidamente a este método se deberá
+	encargar tanto de abrir ficheros como de cerrarlos una vez se
+	termine el trabajo de obtención de entradas.
+	'''
 	
-	def __iter__(self):
-		# Estamos abriendo el fichero con el encoding 'latin-1'
-		# Para text mining lo recomendable es el encoding 'utf-8'
-		self.infile = open(self.filename,'r',encoding="latin-1")
-		print("Procesando fichero ",self.filename)
-		
-		return self
-	
-	def __next__(self):
-		# Inicialización de variables
-		acc = []
-		id = ''
-		lastdate = ''
-		description = ''
-		sequence = ''
-		molw = ''
-		readingseq = False
-		for line in self.infile:
+	# Inicialización de variables
+	acc = []
+	id = ''
+	lastdate = ''
+	description = ''
+	sequence = ''
+	molw = ''
+	readingseq = False
+	try:
+		for line in uniF:
 			# Lo primero, quitar el salto de línea
 			line = line.rstrip('\n')
 			
@@ -46,13 +42,19 @@ class SWParser(object):
 				# registro hay que proceder a guardar
 				# los datos en la base de datos
 				
+				# Si no hemos conseguido capturar la descripción
+				# no quiere decir que no tenga, sino que el
+				# programa no ha sido capaz de hacerlo
 				if description == '':
 					description = None
 				
 				# Impresión de comprobación
-				print("ACC: {0} ; ID: {1} ; Last: {2}".format(acc[0],id,lastdate))
+				print(f"ACC: {acc[0]} ; ID: {id} ; Last: {lastdate}")
 				
-				return acc,id,lastdate,description,sequence,molw
+				# Como ya tenemos una entrada entera
+				# paremos de leer por ahora, para poder
+				# devolver lo recopilado
+				break
 			
 			# ¿Estoy leyendo una secuencia?
 			if readingseq:
@@ -64,35 +66,34 @@ class SWParser(object):
 				
 			# Como no la estoy leyendo, busco los patrones apropiados
 			else:
+				matched = False
+				
 				seqmatch = re.search(r"^SQ.+[^0-9](\d+) MW",line)
-				matched = seqmatch is not None
+				if seqmatch is not None:
+					matched = True
+					# Extracción del peso molecular
+					# y comienzo de secuencia
+					molw = seqmatch.group(1)
+					readingseq = True
 				
-				idmatch = None if matched else re.search(r"^ID   ([a-zA-Z0-9_]+)",line)
-				matched = matched or idmatch is not None
-				
-				dtmatch = None if matched else re.search(r"^DT   (\d{2}-[A-Z]{3}-\d{4}),",line)
-				matched = matched or dtmatch is not None
-				
-				acmatch = None if matched else re.search(r"^AC   (.+)",line)
-				matched = matched or acmatch is not None
-				
-				dematch = None if matched else re.search(r"^DE   RecName: Full=(.+);",line)
-				matched = matched or dematch is not None
-				
-				if matched:
-					if seqmatch is not None:
-						# Extracción del peso molecular
-						# y comienzo de secuencia
-						molw = seqmatch.group(1)
-						
-						readingseq = True
-					elif idmatch is not None:
+				if not matched:
+					idmatch = re.search(r"^ID   ([a-zA-Z0-9_]+)",line)
+					if idmatch is not None:
+						matched = True
 						# Identificador
 						id = idmatch.group(1)
-					elif dtmatch is not None:
+				
+				if not matched:
+					dtmatch = re.search(r"^DT   (\d{2}-[A-Z]{3}-\d{4}),",line)
+					if dtmatch is not None:
+						matched = True
 						# Fecha de la última actualización
 						lastdate = dtmatch.group(1)
-					elif acmatch is not None:
+				
+				if not matched:
+					acmatch = re.search(r"^AC   (.+)",line)
+					if acmatch is not None:
+						matched = True
 						# Los accnumber, que pueden estar en varias líneas
 						ac = acmatch.group(1)
 						# Elimino los espacios y quito el posible último punto y coma
@@ -101,17 +102,29 @@ class SWParser(object):
 						# Rompo por los puntos y coma, y
 						# añado a la lista de accnumber
 						acc.extend(ac.split(';'))
-					elif dematch is not None:
+				
+				if not matched:
+					dematch = re.search(r"^DE   RecName: Full=(.+);",line)
+					if dematch is not None:
+						matched = True
 						# La descripción, que puede estar en varias líneas
 						if description != '':
 							description += ', EC '
 						description += dematch.group(1)
-		
-		# Se cierra el fichero procesado
-		self.infile.close()
-		
-		# Y como hemos terminado, lo indicamos
-		raise StopIteration
+				
+	except EOFError:
+		# Se ha acabado el fichero sin terminar de recopilar los
+		# datos, así que lo indicamos poniendo por ejemplo
+		# acc a None
+		acc = None
+	else:
+		# Si no ha habido fallos, pero no hemos recuperado nada,
+		# poner acc a None
+		if len(acc) == 0:
+			acc = None
+
+	# Devolvemos los datos de la entrada, o el indicador de que no hay datos
+	return acc,id,lastdate,description,sequence,molw
 
 
 # Comprobación del número de parámetros de entrada
@@ -137,13 +150,26 @@ if __name__ == '__main__':
 			# Procesamiento de cada fichero
 			for infile in infiles:
 				try:
-					# Recuperar entradas una a una con un iterador
-					for acc,id,lastdate,description,sequence,molw in iter(SWParser(infile)):
-						# Preparación de las operaciones de inserción a realizar repetidamente
-						# (Debería hacer un chequeo aquí, para comprobar que funcionan)
-						cur.execute('INSERT INTO SWISSENTRY VALUES (?,?,?,?,?,?)',(acc[0],id,lastdate,description,sequence,molw))
-						for accnumber in acc:
-								cur.execute('INSERT INTO ACCNUMBERS(main_accnumber,accnumber) VALUES (?,?)',(acc[0],accnumber))
+					# Estamos abriendo el fichero con el encoding 'latin-1'
+					# Para text mining lo recomendable es el encoding 'utf-8'
+					with open(infile, mode='r', encoding='latin-1') as uniF:
+						print("Procesando fichero ", infile)
+						
+						# Este bucle tiene su condición de salida en su interior
+						# y por ello es un bucle potencialmente infinito
+						while True:
+							# Recuperar entradas una a una
+							acc,id,lastdate,description,sequence,molw = siguienteEntrada(uniF)
+							
+							# Como no hay entradas, me salgo
+							if acc is None:
+								break
+							
+							# Preparación de las operaciones de inserción a realizar repetidamente
+							# (Debería hacer un chequeo aquí, para comprobar que funcionan)
+							cur.execute('INSERT INTO SWISSENTRY VALUES (?,?,?,?,?,?)',(acc[0],id,lastdate,description,sequence,molw))
+							for accnumber in acc:
+									cur.execute('INSERT INTO ACCNUMBERS(main_accnumber,accnumber) VALUES (?,?)',(acc[0],accnumber))
 				except dbi.Error as e:
 					print("Error al insertar en la base de datos: ",e.diag.message_primary,file=sys.stderr)
 					raise

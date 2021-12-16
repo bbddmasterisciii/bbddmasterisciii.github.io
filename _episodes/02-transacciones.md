@@ -90,7 +90,7 @@ Si una base de datos tiene unas tablas bien definidas, su mantenimieto y actuali
 >   
 >Nos fijamos en la última línea que es la que crea la clave externa, su estructura es la siguiente:
 > ~~~sql
->FORGEIN KEY (col_ref) REFERENCES otra_tabla (col_claveprimaria)
+>FOREIGN KEY (col_ref) REFERENCES otra_tabla (col_claveprimaria)
 > ~~~
 > {: .sql}
 >
