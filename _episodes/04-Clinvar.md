@@ -19,7 +19,7 @@ a su importancia clínica, información sobre el remitente y otros datos de resp
 secuencias de referencia y se informan de acuerdo con el estándar [HGVS](https://onlinelibrary.wiley.com/doi/full/10.1002/humu.22981){:target="_blank"}. 
 Para más informacióm, podeis consultar la web de [ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/docs/help){:target="_blank"}.
 
-Un volcado de los contenidos de ClinVar está disponible en <ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/>{:target="_blank"}. Dicho contenido en formato tabular se puede descargar de la carpeta `tab_delimited`,
+Un volcado de los contenidos de ClinVar está disponible en <https://ftp.ncbi.nlm.nih.gov/pub/clinvar/>{:target="_blank"}. Dicho contenido en formato tabular se puede descargar de la carpeta `tab_delimited`,
 eligiendo el archivo comprimido [variant_summary.txt.gz](ftp://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/variant_summary.txt.gz){:target="_blank"}. 
 
 
