@@ -10,7 +10,7 @@ ifeq (,${INDOCKER})
 else
   INDOCKER := ${INDOCKER}
 endif
-HOSTTIMEZONE := $(shell cat /etc/timezone || true)
+HOSTTIMEZONE := $(shell cat /etc/timezone 2> /dev/null || true)
 ifeq (,$(HOSTTIMEZONE))
   HOSTTIMEZONE := Europe/Madrid
 endif
@@ -73,11 +73,13 @@ docker-site :
 
 ## podman-serve     : use podman to build the site
 podman-serve :
+	-[ -d ${PRJDIR}/.bundle ] || mkdir -p ${PRJDIR}/.bundle
 	-podman run --rm -it -v ${PRJDIR}:/srv/jekyll -v ${PRJDIR}/.bundle:/usr/local/bundle -e TZ=${HOSTTIMEZONE} -e INDOCKER=yes -p 127.0.0.1:4000:4000 ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} /bin/bash -c 'chgrp -R jekyll . ; chmod -R g+w . ; make serve ; chgrp root . ; find . -user jekyll -exec chown -R root: {} \; ; chmod -R g-w . ; chgrp -R root .'
 	#podman run --rm -it -v ${PRJDIR}:/srv/jekyll -e TZ=Europe/Madrid ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} chown -R $(shell id -u):$(shell id -g) /srv/jekyll
 
 ## docker-serve     : use podman to build the site
 podman-site :
+	-[ -d ${PRJDIR}/.bundle ] || mkdir -p ${PRJDIR}/.bundle
 	-podman run --rm -it -v ${PRJDIR}:/srv/jekyll -v ${PRJDIR}/.bundle:/usr/local/bundle -e TZ=${HOSTTIMEZONE} -e INDOCKER=yes ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} /bin/bash -c 'chgrp -R jekyll . ; chmod -R g+w . ; make site ; find . -user jekyll -exec chown -R root: {} \; ; chmod -R g-w . ; chgrp -R root .'
 	#podman run --rm -it -v ${PRJDIR}:/srv/jekyll -e TZ=Europe/Madrid ${JEKYLL_DOCKER_IMG}:${JEKYLL_VERSION} chown -R $(shell id -u):$(shell id -g) /srv/jekyll
 
