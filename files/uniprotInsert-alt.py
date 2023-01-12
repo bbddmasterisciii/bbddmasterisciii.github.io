@@ -142,7 +142,7 @@ if __name__ == '__main__':
 			# Esto sirve para que cada sentencia se ejecute inmediatamente
 			#conn.autocommit = True
 		except dbi.Error as e:
-			print("Ha habido un problema al conectar a la base de datos: ",e.diag.message_primary,file=sys.stderr)
+			print("Ha habido un problema al conectar a la base de datos: ",str(e),file=sys.stderr)
 			raise
 		
 		# Trabajo a nivel de transacción
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 							for accnumber in acc:
 									cur.execute('INSERT INTO ACCNUMBERS(main_accnumber,accnumber) VALUES (?,?)',(acc[0],accnumber))
 				except dbi.Error as e:
-					print("Error al insertar en la base de datos: ",e.diag.message_primary,file=sys.stderr)
+					print("Error al insertar en la base de datos: ",str(e),file=sys.stderr)
 					raise
 				except IOError as e:
 					print("Error de lectura de fichero {0}: {1}".format(e.errno, e.strerror),file=sys.stderr)
