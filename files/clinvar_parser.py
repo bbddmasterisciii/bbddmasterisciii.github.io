@@ -115,7 +115,7 @@ def open_clinvar_db(db_file):
 		for tableDecl in CLINVAR_TABLE_DEFS:
 			cur.execute(tableDecl)
 	except sqlite3.Error as e:
-		print("An error occurred: {}".format(e.args[0]), file=sys.stderr)
+		print("An error occurred: {}".format(str(e)), file=sys.stderr)
 	finally:
 		cur.close()
 	
