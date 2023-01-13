@@ -42,6 +42,8 @@ a nuestro ordenador y lo usaremos junto con el programa recién estudiado para i
 >
 {: .callout}
 
+{% include asciinema_video.html cast_url='/files/casts/20230112-BBDD.cast' %} 
+
 
 >## 3. Creación de un fichero desde Python, usando información de la base de datos
 >En este caso vamos a hacer el caso contrario, es decir, vamos a crear un programa en Python que automáticamente hará consultas a la base de datos de unos campos determinados. Los resultados de esa consulta se procesarán con Python para crear un fichero. De forma más concreta vamos a seleccionar los identificadores y descripción de cada proteína almacenada en nuestra base de datos y su secuencia
