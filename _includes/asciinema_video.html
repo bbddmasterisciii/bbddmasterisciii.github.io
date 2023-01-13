@@ -8,7 +8,7 @@ Download cast <a href="{{ page.root}}{{ include.cast_url }}" target="_blank">{{ 
     	"{{ page.root }}{{ include.cast_url }}",
 	document.getElementById("ap_{{ player_id }}"),
         {
-	    fit: 'height',
+	    fit: 'both',
 	    idleTimeLimit: {{ include.idle | default: 2 }},
         }
     );
