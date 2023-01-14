@@ -2,15 +2,16 @@
 {% assign player_id = page.player_id | default: 0 %}
 {% assign page.player_id = player_id | plus: 1 %}
 Download cast <a href="{{ page.root}}{{ include.cast_url }}" target="_blank">{{ include.cast_url }}</a>
-<div style="height: 90vh; margin:auto" id="ap_{{ player_id }}"></div>
-<script>
-    AsciinemaPlayer.create(
-    	"{{ page.root }}{{ include.cast_url }}",
-	document.getElementById("ap_{{ player_id }}"),
-        {
-	    fit: 'both',
-	    idleTimeLimit: {{ include.idle | default: 2 }},
-        }
-    );
-</script>
+	<div style="height: 90vh; margin:auto" id="ap_{{ player_id }}">
+		<script>
+		    AsciinemaPlayer.create(
+			"{{ page.root }}{{ include.cast_url }}",
+			document.getElementById("ap_{{ player_id }}"),
+			{
+			    fit: 'both',
+			    idleTimeLimit: {{ include.idle | default: 2 }},
+			}
+		    );
+		</script>
+	</div>
 </div>

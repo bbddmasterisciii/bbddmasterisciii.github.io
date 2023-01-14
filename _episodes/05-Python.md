@@ -177,6 +177,6 @@ keypoints:
 > sqlite3 clinvar.db 'SELECT COUNT(*) FROM variant'
 > ~~~
 > {: .bash}
-> {% include asciinema_video.html cast_url='/files/casts/clinvar_20230113.cast' %} 
 >
  {: .callout}
+{% include asciinema_video.html cast_url='/files/casts/clinvar_20230113.cast' %} 
