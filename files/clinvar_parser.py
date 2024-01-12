@@ -4,6 +4,19 @@
 import sys, os
 
 import sqlite3
+try:
+	# Trying to load a newer version
+	import pysqlite3
+	if pysqlite3.sqlite_version_info > sqlite3.sqlite_version_info:
+		del sqlite3
+		import pysqlite3 as sqlite3
+	else:
+		del pysqlite3
+except:
+	pass
+
+if sqlite3.sqlite_version_info < (3, 37, 0):
+	raise AssertionError("Este programa necesita una versión de SQLite igual o superior a 3.37.0")
 
 # For compressed input files
 import gzip
@@ -14,32 +27,32 @@ CLINVAR_TABLE_DEFS = [
 """
 CREATE TABLE IF NOT EXISTS gene (
 	gene_id INTEGER NOT NULL,
-	gene_symbol VARCHAR(64) NOT NULL,
-	HGNC_ID VARCHAR(64) NOT NULL,
+	gene_symbol TEXT NOT NULL,
+	HGNC_ID TEXT NOT NULL,
 	PRIMARY KEY (gene_symbol)
-)
+) STRICT
 """
 ,
 """
 CREATE TABLE IF NOT EXISTS variant (
 	ventry_id INTEGER PRIMARY KEY AUTOINCREMENT,
 	allele_id INTEGER NOT NULL,
-	name VARCHAR(256),
-	type VARCHAR(256) NOT NULL,
+	name TEXT,
+	type TEXT NOT NULL,
 	dbSNP_id INTEGER NOT NULL,
-	phenotype_list VARCHAR(4096),
+	phenotype_list TEXT,
 	gene_id INTEGER,
-	gene_symbol VARCHAR(64),
-	HGNC_ID VARCHAR(64),
-	assembly VARCHAR(16),
-	chro VARCHAR(16) NOT NULL,
+	gene_symbol TEXT,
+	HGNC_ID TEXT,
+	assembly TEXT,
+	chro TEXT NOT NULL,
 	chro_start INTEGER NOT NULL,
 	chro_stop INTEGER NOT NULL,
-	ref_allele VARCHAR(4096),
-	alt_allele VARCHAR(4096),
-	cytogenetic VARCHAR(64),
+	ref_allele TEXT,
+	alt_allele TEXT,
+	cytogenetic TEXT,
 	variation_id INTEGER NOT NULL
-)
+) STRICT
 """
 ,
 """
@@ -56,43 +69,43 @@ CREATE INDEX gene_symbol_variant ON variant(gene_symbol)
 ,
 """
 CREATE TABLE IF NOT EXISTS gene2variant (
-	gene_symbol VARCHAR(64) NOT NULL,
+	gene_symbol TEXT NOT NULL,
 	ventry_id INTEGER NOT NULL,
 	PRIMARY KEY (ventry_id, gene_symbol),
 	FOREIGN KEY (gene_symbol) REFERENCES gene(gene_symbol)
 		ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (ventry_id) REFERENCES variant(ventry_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
-)
+) STRICT
 """
 ,
 """
 CREATE TABLE IF NOT EXISTS clinical_sig (
 	ventry_id INTEGER NOT NULL,
-	significance VARCHAR(64) NOT NULL,
+	significance TEXT NOT NULL,
 	FOREIGN KEY (ventry_id) REFERENCES variant(ventry_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
-)
+) STRICT
 """
 ,
 """
 CREATE TABLE IF NOT EXISTS review_status (
 	ventry_id INTEGER NOT NULL,
-	status VARCHAR(64) NOT NULL,
+	status TEXT NOT NULL,
 	FOREIGN KEY (ventry_id) REFERENCES variant(ventry_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
-)
+) STRICT
 """
 ,
 """
 CREATE TABLE IF NOT EXISTS variant_phenotypes (
 	ventry_id INTEGER NOT NULL,
 	phen_group_id INTEGER NOT NULL,
-	phen_ns VARCHAR(64) NOT NULL,
-	phen_id VARCHAR(64) NOT NULL,
+	phen_ns TEXT NOT NULL,
+	phen_id TEXT NOT NULL,
 	FOREIGN KEY (ventry_id) REFERENCES variant(ventry_id)
 		ON DELETE CASCADE ON UPDATE CASCADE
-)
+) STRICT
 """
 ]
 
@@ -103,10 +116,25 @@ def open_clinvar_db(db_file):
 		exists
 	"""
 	
+	if not os.path.exists(db_file):
+		# First time database is created, its mode is switched to WAL
+		db = sqlite3.connect(db_file, isolation_level=None)
+		cur = db.cursor()
+		try:
+			cur.execute("PRAGMA journal_mode=WAL")
+		except sqlite3.Error as e:
+			print("An error occurred: {}".format(str(e)), file=sys.stderr)
+		finally:
+			cur.close()
+			db.close()
+			
+			
 	db = sqlite3.connect(db_file)
 	
 	cur = db.cursor()
 	try:
+		# See https://phiresky.github.io/blog/2020/sqlite-performance-tuning/
+		cur.execute("PRAGMA synchronous = normal;")
 		# Let's enable the foreign keys integrity checks
 		cur.execute("PRAGMA FOREIGN_KEYS=ON")
 		
@@ -296,7 +324,8 @@ if __name__ == '__main__':
 	# First, let's create or open the database
 	db = open_clinvar_db(db_file)
 
-	# Second
-	store_clinvar_file(db,clinvar_file)
-
-	db.close()
+	try:
+		# Second
+		store_clinvar_file(db,clinvar_file)
+	finally:
+		db.close()
