@@ -52,7 +52,7 @@ if __name__ == '__main__':
                         print(sequence,file=write_file)
                     
             except dbi.Error as e:
-                print("Error al insertar en la base de datos: ",str(e),file=sys.stderr)
+                print("Error al leer de la base de datos: ",str(e),file=sys.stderr)
                 raise
             except IOError as e:
                 print("Error de escritura de fichero {0}: {1}".format(e.errno, e.strerror),file=sys.stderr)
