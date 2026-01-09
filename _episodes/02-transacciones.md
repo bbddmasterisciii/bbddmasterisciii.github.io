@@ -194,7 +194,7 @@ sentencias que ahí aparecen, haciendo énfasis en las **claves primarias**, los
 > Tras haber leído y entendido el esquema que lo forma, incluiremos debajo de las sentencias
 `CREATE`, dos sentencias adicionales de `INSERT` de dos proteinas cualquiera, que se obtendrán
 del abrir dos veces el siguiente link de
-[Uniprot](https://www.uniprot.org/uniprot/?query=reviewed:yes&random=yes){:target="_blank"} (una vez en la página, pinchad en `Format->Text`).
+[Uniprot](https://www.uniprot.org/uniprot/?query=reviewed:true&random=yes){:target="_blank"} (una vez en la página, pinchad en `Format->Text`).
 >
 > Cuando ya tengais lo tengais, vamos a decirle a SQLite que lea este fichero y que ejecute los comandos SQL que hay en ese fichero. Recordad que eso lo vimos ayer. No olvideis que son dos tablas y en ambas hay que insertar los dos registros.
 >
